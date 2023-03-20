@@ -1,0 +1,25 @@
+{
+  "name": "ghostcms-activitypub",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "lint": "npx eslint --fix app.js routes/",
+    "dev": "npm run lint && DEBUG=ghostcms-activitypub:* npm start"
+  },
+  "dependencies": {
+    "@tryghost/content-api": "^1.11.7",
+    "debug": "~2.6.9",
+    "dotenv": "^16.0.3",
+    "express": "~4.16.1",
+    "morgan": "~1.9.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "eslint": "^8.36.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1"
+  }
+}
