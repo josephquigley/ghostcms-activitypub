@@ -3,6 +3,7 @@ const express = require('express')
 const logger = require('morgan')
 const GhostContentAPI = require('@tryghost/content-api')
 const utils = require('./utils')
+const bodyParser = require('body-parser')
 
 /** Define API paths **/
 global.actorPath = '/actors'
@@ -25,7 +26,8 @@ const app = express()
 
 app.use(logger('dev'))
 app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
+app.use(bodyParser.json({type: 'application/activity+json'})); // support json encoded bodies
 
 const ghost = new GhostContentAPI({
   url: `https://${process.env.GHOST_SERVER}`,
