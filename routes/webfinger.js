@@ -1,25 +1,22 @@
 const express = require('express')
 const router = express.Router()
 
-const profileURL = 'https://' + process.env.PROFILE_URL.removeHttpURI()
-const accountURL = `https://${process.env.ACCOUNT_DOMAIN}${process.env.API_ROOT_PATH}${global.actorPath}/${process.env.ACCOUNT_NAME}`
-
 const webfingerPayload = {
-  subject: 'acct:' + process.env.ACCOUNT_NAME + '@' + process.env.ACCOUNT_DOMAIN,
+  subject: 'acct:' + process.env.ACCOUNT_USERNAME + '@' + process.env.GHOST_SERVER,
   aliases: [
-    profileURL,
-    accountURL
+    global.profileURL,
+    global.accountURL
   ],
   links: [
     {
       rel: 'http://webfinger.net/rel/profile-page',
       type: 'text/html',
-      href: profileURL
+      href: global.profileURL
     },
     {
       rel: 'self',
       type: 'application/activity+json',
-      href: accountURL
+      href: global.accountURL
     }/*,
     {
       rel: 'http://ostatus.org/schema/1.0/subscribe',
@@ -31,7 +28,6 @@ const webfingerPayload = {
 /* Static webfinger for the Ghost activitypub account. */
 router.get('/', function (req, res, next) {
   const resource = req.query.resource
-  const accountNotFoundMsg = 'Account not found'
 
   res.set('Access-Control-Allow-Methods', 'GET')
 
@@ -43,11 +39,11 @@ router.get('/', function (req, res, next) {
 
   const account = resource.replace(/^acct:/, '')
 
-  if (account === process.env.ACCOUNT_NAME + '@' + process.env.ACCOUNT_DOMAIN) {
+  if (account === process.env.ACCOUNT_USERNAME + '@' + process.env.GHOST_SERVER) {
     res.json(webfingerPayload)
   } else {
     res.status(404)
-    res.send(accountNotFoundMsg)
+    res.send(global.accountNotFoundMsg)
   }
 })
 

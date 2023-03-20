@@ -4,6 +4,43 @@
  * Module dependencies.
  */
 
+// Load config
+require('dotenv').config()
+const utils = require('../utils')
+
+/** Sanitize user inputs **/
+if (process.env.GHOST_SERVER === '') {
+  throw new Error('.env GHOST_SERVER value is required. Got empty.')
+}
+
+process.env.GHOST_SERVER = utils.removeHttpURI(process.env.GHOST_SERVER).replace(/\/\s*$/g, '')
+
+if (process.env.ACCOUNT_USERNAME === '') {
+  throw new Error('.env ACCOUNT_USERNAME value is required. Got empty.')
+}
+
+if (process.env.GHOST_CONTENT_API_KEY === '') {
+  throw new Error('.env GHOST_CONTENT_API_KEY value is required. Got empty.')
+}
+
+process.env.API_ROOT_PATH = process.env.API_ROOT_PATH.replace(/\s+/g, '')
+if (!process.env.API_ROOT_PATH.startsWith('/')) {
+  process.env.API_ROOT_PATH = '/' + process.env.API_ROOT_PATH
+}
+
+process.env.API_ROOT_PATH = process.env.API_ROOT_PATH.replace(/\/\s*$/g, '')
+
+if (process.env.SERVER_DOMAIN === '') {
+  throw new Error('.env SERVER_DOMAIN value is required. Got empty.')
+}
+process.env.SERVER_DOMAIN = utils.removeHttpURI(process.env.SERVER_DOMAIN).replace(/\/\s*$/g, '')
+
+if (process.env.PROFILE_URL === '') {
+  process.env.PROFILE_URL = 'https://' + process.env.GHOST_SERVER
+}
+
+/** End Sanitize user inputs **/
+
 var app = require('../app');
 var debug = require('debug')('ghostcms-activitypub:server');
 var http = require('http');
@@ -11,7 +48,6 @@ var http = require('http');
 /**
  * Get port from environment and store in Express.
  */
-
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
