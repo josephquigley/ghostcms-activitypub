@@ -22,11 +22,11 @@ const webfingerPayload = {
       rel: 'self',
       type: 'text/html',
       href: global.profileURL
-    },
+    }/*,
     {
       rel: 'http://ostatus.org/schema/1.0/subscribe',
-      template: `${global.accountURL}/authorize_interaction?uri={uri}`
-    }
+      template: `${global.accountURL}/ostatus_subscribe?uri={uri}`
+    } */
   ]
 }
 

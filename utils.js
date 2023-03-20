@@ -1,8 +1,8 @@
 const sqlite3 = require('sqlite3')
 const fs = require('fs')
-const request = require('request')
 const crypto = require('crypto')
 const promisify = require('util').promisify
+const request = promisify(require('request'))
 
 const dataDir = 'data'
 const certsDir = `${dataDir}/certs`
@@ -57,24 +57,23 @@ function createTables (db) {
     `)
 }
 
-function signAndSend (message, name, req, res, targetDomain) {
+function signAndSend (message, res) {
   // get the URI of the actor object and append 'inbox' to it
-  const inbox = message.object.actor + '/inbox'
-  const inboxFragment = inbox.replace('https://' + targetDomain, '')
+  const inbox = new URL(message.object.actor + '/inbox')
 
   const digestHash = crypto.createHash('sha256').update(JSON.stringify(message)).digest('base64')
   const signer = crypto.createSign('sha256')
   const d = new Date()
-  const stringToSign = `(request-target): post ${inboxFragment}\nhost: ${targetDomain}\ndate: ${d.toUTCString()}\ndigest: SHA-256=${digestHash}`
+  const stringToSign = `(request-target): post ${inbox.pathname}\nhost: ${inbox.hostname}\ndate: ${d.toUTCString()}\ndigest: SHA-256=${digestHash}`
   signer.update(stringToSign)
   signer.end()
   const signature = signer.sign(privateKey)
   const signatureB64 = signature.toString('base64')
   const header = `keyId="${global.accountURL}",headers="(request-target) host date digest",signature="${signatureB64}"`
   request({
-    url: inbox,
+    url: inbox.toString(),
     headers: {
-      Host: targetDomain,
+      Host: inbox.hostname,
       Date: d.toUTCString(),
       Digest: `SHA-256=${digestHash}`,
       Signature: header
@@ -86,35 +85,32 @@ function signAndSend (message, name, req, res, targetDomain) {
     if (error) {
       console.error('Error signing message:', error, response.body)
     } else {
-      console.log('Response:', response.body)
+      console.log('Sign response:', response.body)
     }
   })
   return res.status(200)
 }
 
-module.exports = {
-  removeHttpURI: function (str) {
-    return str.replace(/^http[s]*:\/\//, '')
-  },
+function removeHttpURI (str) {
+  return str.replace(/^http[s]*:\/\//, '')
+}
 
+module.exports = {
+  removeHttpURI,
   certs,
   db: openDatabase(),
   pubKey,
   privateKey,
   signAndSend,
 
-  sendAcceptMessage: function (body, id, name, domain, req, res, targetDomain) {
-    if (!id) {
-      id = crypto.randomBytes(16).toString('hex')
-    }
-
+  sendAcceptMessage: function (object, id, res) {
     const message = {
       '@context': 'https://www.w3.org/ns/activitystreams',
       id,
       type: 'Accept',
       actor: `${global.accountURL}`,
-      object: body
+      object
     }
-    signAndSend(message, name, domain, req, res, targetDomain)
+    signAndSend(message, res)
   }
 }
