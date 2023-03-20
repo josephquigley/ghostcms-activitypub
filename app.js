@@ -15,6 +15,8 @@ global.staticImagesPath = '/activitypub_static_images'
 global.profileURL = 'https://' + utils.removeHttpURI(process.env.PROFILE_URL)
 global.accountURL = `https://${process.env.SERVER_DOMAIN}${process.env.API_ROOT_PATH}${global.actorPath}/${process.env.ACCOUNT_USERNAME}`
 global.inboxURL = `${global.accountURL}/inbox`
+global.outboxURL = `${global.accountURL}/outbox`
+global.followersURL = `${global.accountURL}/followers`
 global.publicKeyPath = `${global.accountURL}/public_key`
 /** End Define Urls **/
 

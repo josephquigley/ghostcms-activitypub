@@ -20,7 +20,9 @@ const profilePayload = {
   // following: global.accountURL + '/following',
   // followers: global.accountURL + '/followers',
   inbox: global.inboxURL,
-  // outbox: global.accountURL + '/outbox',
+
+  // TODO: Debug why Mastodon doesn't show historical posts?
+  outbox: global.outboxURL,
   // "featured": "https://meta.masto.host/users/GamingNews/collections/featured",
   // "featuredTags": "https://meta.masto.host/users/GamingNews/collections/tags",
   preferredUsername: process.env.ACCOUNT_USERNAME,
@@ -62,9 +64,8 @@ function contentTypeFromUrl (url) {
 }
 
 const profile = async function (req, res, next) {
-  console.log(req.get('Accept'))
+  // If a web browser is requesting the profile, redirect to the Ghost website
   if (req.get('Accept').includes('text/html')) {
-    console.log('Redirect')
     res.redirect(global.profileURL)
     return
   }

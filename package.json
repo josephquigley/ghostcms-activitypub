@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node gen_keys.js && node ./bin/www",
-    "lint": "npx eslint --fix app.js routes/",
+    "lint": "npx eslint --fix app.js utils.js routes/",
     "dev": "npm run lint && NODE_ENV=dev DEBUG=ghostcms-activitypub:* npm start"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "morgan": "~1.9.1",
+    "request": "^2.88.2",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
