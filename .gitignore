@@ -1,3 +1,7 @@
+# Secrets
+certs
+certs/*
+
 # Logs
 logs
 *.log
