@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const webfingerPayload = {
-  subject: 'acct:' + process.env.ACCOUNT_USERNAME + '@' + process.env.GHOST_SERVER,
+  subject: 'acct:' + process.env.ACCOUNT_USERNAME + '@' + process.env.SERVER_DOMAIN,
   aliases: [
     global.profileURL,
     global.accountURL
@@ -17,11 +17,16 @@ const webfingerPayload = {
       rel: 'self',
       type: 'application/activity+json',
       href: global.accountURL
-    }/*,
+    },
+    {
+      rel: 'self',
+      type: 'text/html',
+      href: global.profileURL
+    },
     {
       rel: 'http://ostatus.org/schema/1.0/subscribe',
-      template: `https://mastodon.social/authorize_interaction?uri={uri}'
-    } */
+      template: `${global.accountURL}/authorize_interaction?uri={uri}`
+    }
   ]
 }
 

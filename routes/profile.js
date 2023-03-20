@@ -17,10 +17,10 @@ const profilePayload = {
   ],
   id: global.accountURL,
   type: 'Service', // Bots are 'Service' types
-  // "following": "https://meta.masto.host/users/GamingNews/following",
-  // "followers": "https://meta.masto.host/users/GamingNews/followers",
+  // following: global.accountURL + '/following',
+  // followers: global.accountURL + '/followers',
   inbox: global.inboxURL,
-  // "outbox": "https://meta.masto.host/users/GamingNews/outbox",
+  // outbox: global.accountURL + '/outbox',
   // "featured": "https://meta.masto.host/users/GamingNews/collections/featured",
   // "featuredTags": "https://meta.masto.host/users/GamingNews/collections/tags",
   preferredUsername: process.env.ACCOUNT_USERNAME,
@@ -62,6 +62,13 @@ function contentTypeFromUrl (url) {
 }
 
 const profile = async function (req, res, next) {
+  console.log(req.get('Accept'))
+  if (req.get('Accept').includes('text/html')) {
+    console.log('Redirect')
+    res.redirect(global.profileURL)
+    return
+  }
+
   const ghost = req.app.get('ghost')
 
   const siteData = await ghost.settings.browse()
