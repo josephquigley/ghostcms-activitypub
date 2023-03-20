@@ -1,5 +1,4 @@
 const utils = require('../utils')
-const fs = require('fs')
 
 const mastodonAttachments = {
   attachment: [
@@ -9,10 +8,6 @@ const mastodonAttachments = {
       value: `<a href="${global.profileURL}" target="_blank" rel="nofollow noopener noreferrer me"><span class="invisible">https://</span><span class="">${utils.removeHttpURI(global.profileURL)}</span><span class="invisible"></span></a>`
     }
   ]
-}
-
-function readPublicKey () {
-  return fs.readFileSync(utils.certs.publicKeyPath, 'utf8')
 }
 
 const profilePayload = {
@@ -36,9 +31,9 @@ const profilePayload = {
   discoverable: true,
   attachment: mastodonAttachments,
   publicKey: {
-    id: `${global.accountURL}/public_key`,
+    id: global.publicKeyPath,
     owner: global.accountURL,
-    publicKeyPem: readPublicKey()
+    publicKeyPem: utils.pubKey
   }
 }
 

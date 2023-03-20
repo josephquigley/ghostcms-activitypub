@@ -1,4 +1,5 @@
 const sqlite3 = require('sqlite3')
+const fs = require('fs')
 
 let dataDir = 'data'
 let certsDir = `${dataDir}/certs`
@@ -39,16 +40,21 @@ function createTables(db) {
     `)
 }
 
+const certs = {
+    dir: certsDir,
+    privateKeyPath: `${certsDir}/key.pem`,
+    publicKeyPath: `${certsDir}/pubkey.pem`
+}
+
 module.exports = {
     removeHttpURI: function(str) {
         return str.replace(/^http[s]*:\/\//, '')
     },
 
-    certs: {
-        dir: certsDir,
-        privateKeyPath: `${certsDir}/key.pem`,
-        publicKeyPath: `${certsDir}/pubkey.pem`
-    },
+    certs: certs,
 
-    db: openDatabase()
+    db: openDatabase(),
+
+    pubKey: fs.readFileSync(certs.publicKeyPath, 'utf8'),
+    privateKey: fs.readFileSync(certs.privateKeyPath, 'utf8'),
 }
