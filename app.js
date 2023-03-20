@@ -19,7 +19,7 @@ global.accountNotFoundMsg = 'Account not found'
 /** End Define Common Messages **/
 
 const webfingerRouter = require('./routes/webfinger')
-const profileRouter = require('./routes/profile')
+const actorRouter = require('./routes/actor')
 
 const app = express()
 
@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 })
 
 app.use('/.well-known/webfinger', webfingerRouter)
-app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, profileRouter)
+app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
 
 app.get('*', (req, res) => {
   res.status(404)
@@ -73,5 +73,12 @@ ghost.posts.browse({ limit: 5000 })
     console.warn('Could not fetch oldest Ghost post')
     console.warn(err)
   })
+
+ghost.settings.browse().then((settings) => {
+  app.set('language', settings.lang)
+}).catch((err) => {
+  console.warn('Could not fetch Ghost language')
+  console.warn(err)
+})
 
 module.exports = app

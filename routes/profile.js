@@ -1,5 +1,3 @@
-const express = require('express')
-const router = express.Router()
 const utils = require('../utils')
 
 const mastodonAttachments = {
@@ -38,7 +36,7 @@ function imagePayload () {
   }
 }
 
-router.get('/', async function (req, res, next) {
+const profile = async function (req, res, next) {
   const ghost = req.app.get('ghost')
 
   const siteData = await ghost.settings.browse()
@@ -63,6 +61,6 @@ router.get('/', async function (req, res, next) {
   }
 
   res.json(profilePayload)
-})
+}
 
-module.exports = router
+module.exports = profile
