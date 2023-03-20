@@ -1,6 +1,6 @@
-# Secrets
-certs
-certs/*
+# Data folder
+data
+data/*
 
 # Logs
 logs

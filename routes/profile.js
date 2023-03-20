@@ -1,4 +1,5 @@
 const utils = require('../utils')
+const fs = require('fs')
 
 const mastodonAttachments = {
   attachment: [
@@ -10,12 +11,20 @@ const mastodonAttachments = {
   ]
 }
 
+function readPublicKey () {
+  return fs.readFileSync(utils.certs.publicKeyPath, 'utf8')
+}
+
 const profilePayload = {
+  '@context': [
+    'https://www.w3.org/ns/activitystreams',
+    'https://w3id.org/security/v1'
+  ],
   id: global.accountURL,
   type: 'Service', // Bots are 'Service' types
   // "following": "https://meta.masto.host/users/GamingNews/following",
   // "followers": "https://meta.masto.host/users/GamingNews/followers",
-  // "inbox": "https://meta.masto.host/users/GamingNews/inbox",
+  inbox: global.inboxURL,
   // "outbox": "https://meta.masto.host/users/GamingNews/outbox",
   // "featured": "https://meta.masto.host/users/GamingNews/collections/featured",
   // "featuredTags": "https://meta.masto.host/users/GamingNews/collections/tags",
@@ -25,14 +34,35 @@ const profilePayload = {
   url: global.profileURL,
   manuallyApprovesFollowers: false,
   discoverable: true,
-  // "published": "2022-12-10T00:00:00Z",
-  attachment: mastodonAttachments
+  attachment: mastodonAttachments,
+  publicKey: {
+    id: `${global.accountURL}/public_key`,
+    owner: global.accountURL,
+    publicKeyPem: readPublicKey()
+  }
 }
+
+const jpegContentType = 'image/jpeg'
+const webpContentType = 'image/webp'
+const svgContentType = 'image/svg+xml'
+const pngContentType = 'image/png'
 
 function imagePayload () {
   return {
     type: 'Image',
-    mediaType: 'image/png'
+    mediaType: pngContentType
+  }
+}
+
+function contentTypeFromUrl (url) {
+  if (url.endsWith('jpg') || url.endsWith('jpeg')) {
+    return jpegContentType
+  } else if (url.endsWith('webp')) {
+    return webpContentType
+  } else if (url.endsWith('svg')) {
+    return svgContentType
+  } else { // Assume png
+    return pngContentType
   }
 }
 
@@ -45,19 +75,24 @@ const profile = async function (req, res, next) {
   profilePayload.summary = siteData.description // TODO add h-card data?
   profilePayload.published = req.app.get('account_created_at')
 
-  if (siteData.icon && siteData.icon !== '') {
-    profilePayload.icon = imagePayload()
-    profilePayload.icon.url = siteData.icon
-  }
-
+  profilePayload.icon = imagePayload()
   if (siteData.logo && siteData.logo !== '') {
-    profilePayload.icon = imagePayload()
     profilePayload.icon.url = siteData.logo
+  } else {
+    profilePayload.icon.url = `https://${process.env.SERVER_DOMAIN}${global.staticImagesPath}/ghost-logo-orb.jpg`
   }
 
   if (siteData.cover_image && siteData.cover_image !== '') {
     profilePayload.image = imagePayload()
     profilePayload.image.url = siteData.cover_image
+  }
+
+  if (profilePayload.icon) {
+    profilePayload.icon.mediaType = contentTypeFromUrl(profilePayload.icon.url)
+  }
+
+  if (profilePayload.image) {
+    profilePayload.image.mediaType = contentTypeFromUrl(profilePayload.image.url)
   }
 
   res.json(profilePayload)

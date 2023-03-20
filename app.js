@@ -11,8 +11,10 @@ global.subscribePath = '/subscribe'
 /** End Define API paths **/
 
 /** Define Urls **/
+global.staticImagesPath = '/activitypub_static_images'
 global.profileURL = 'https://' + utils.removeHttpURI(process.env.PROFILE_URL)
 global.accountURL = `https://${process.env.SERVER_DOMAIN}${process.env.API_ROOT_PATH}${global.actorPath}/${process.env.ACCOUNT_USERNAME}`
+global.inboxURL = `${global.accountURL}/inbox`
 /** End Define Urls **/
 
 /** Define Common Messages **/
@@ -27,7 +29,7 @@ const app = express()
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(bodyParser.json({type: 'application/activity+json'})); // support json encoded bodies
+app.use(bodyParser.json({ type: 'application/activity+json' })) // support json encoded bodies
 
 const ghost = new GhostContentAPI({
   url: `https://${process.env.GHOST_SERVER}`,
@@ -36,6 +38,7 @@ const ghost = new GhostContentAPI({
 })
 
 app.set('ghost', ghost)
+app.set('db', utils.db)
 
 function setAccountCreationDate (dateStr) {
   app.set('account_created_at', dateStr)
@@ -53,6 +56,7 @@ app.use((req, res, next) => {
 
 app.use('/.well-known/webfinger', webfingerRouter)
 app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
+app.use(global.staticImagesPath, express.static('img'))
 
 app.get('*', (req, res) => {
   res.status(404)

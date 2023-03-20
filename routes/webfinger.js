@@ -39,7 +39,9 @@ router.get('/', function (req, res, next) {
 
   const account = resource.replace(/^acct:/, '')
 
-  if (account === process.env.ACCOUNT_USERNAME + '@' + process.env.GHOST_SERVER) {
+  const debugAccount = process.env.NODE_ENV === 'dev' && account === process.env.ACCOUNT_USERNAME + '@' + process.env.SERVER_DOMAIN
+
+  if (account === process.env.ACCOUNT_USERNAME + '@' + process.env.GHOST_SERVER || debugAccount) {
     res.json(webfingerPayload)
   } else {
     res.status(404)

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node gen_keys.js && node ./bin/www",
     "lint": "npx eslint --fix app.js routes/",
-    "dev": "npm run lint && DEBUG=ghostcms-activitypub:* npm start"
+    "dev": "npm run lint && NODE_ENV=dev DEBUG=ghostcms-activitypub:* npm start"
   },
   "dependencies": {
     "@tryghost/content-api": "^1.11.7",
