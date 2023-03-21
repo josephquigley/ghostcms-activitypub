@@ -62,7 +62,9 @@ async function signAndSend (message, params) {
   // TODO: Sign all requests for remote data as well
   const inbox = params.inbox ? new URL(params.inbox) : new URL(message.object.actor + '/inbox')
 
-  const digestHash = crypto.createHash('sha256').update(JSON.stringify(message)).digest('base64')
+  message = JSON.stringify(message)
+
+  const digestHash = crypto.createHash('sha256').update(message).digest('base64')
   const signer = crypto.createSign('sha256')
   const d = new Date()
   const stringToSign = `(request-target): post ${inbox.pathname}\nhost: ${inbox.hostname}\ndate: ${d.toUTCString()}\ndigest: SHA-256=${digestHash}`
@@ -82,8 +84,7 @@ async function signAndSend (message, params) {
   }
 
   try {
-    const response = await postJSON(inbox.toString(), message, headers)
-    console.log('Sign response:', response)
+    await postJSON(inbox.toString(), message, headers)
   } catch (err) {
     // Mastodon sends back an empty response, which breaks JSON parsing in the bent library
     if (err instanceof SyntaxError) {

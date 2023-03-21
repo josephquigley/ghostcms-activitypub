@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
 
+const subject = 'acct:' + process.env.ACCOUNT_USERNAME + '@' + process.env.SERVER_DOMAIN
+
 const webfingerPayload = {
-  subject: 'acct:' + process.env.ACCOUNT_USERNAME + '@' + process.env.SERVER_DOMAIN,
+  subject,
   aliases: [
+    subject,
     global.profileURL,
     global.accountURL
   ],
@@ -17,12 +20,9 @@ const webfingerPayload = {
       rel: 'self',
       type: 'application/activity+json',
       href: global.accountURL
-    },
-    {
-      rel: 'self',
-      type: 'text/html',
-      href: global.profileURL
-    }/*,
+    }
+
+    /*
     {
       rel: 'http://ostatus.org/schema/1.0/subscribe',
       template: `${global.accountURL}/ostatus_subscribe?uri={uri}`

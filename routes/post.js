@@ -1,31 +1,41 @@
 const utils = require('../utils')
 
 function createPost (ghostPost, language) {
+  const id = `https://${process.env.SERVER_DOMAIN}${process.env.API_ROOT_PATH}${global.actorPath}/${process.env.ACCOUNT_USERNAME}/${ghostPost.id}`
+
   const postPayload = {
-    id: ghostPost.id,
-    created_at: ghostPost.published_at,
-    in_reply_to_id: null,
-    in_reply_to_account_id: null,
+    id,
+    published: ghostPost.published_at,
     sensitive: false,
-    spoiler_text: '',
+    summary: '',
     visibility: 'public',
     language,
-    uri: `https://${process.env.SERVER_DOMAIN}${process.env.API_ROOT_PATH}${global.actorPath}/${process.env.ACCOUNT_USERNAME}/${ghostPost.id}`,
+    uri: id,
     url: ghostPost.url,
-    content: ghostPost.html
+    content: ghostPost.html,
+    type: 'Article',
+    to: 'https://www.w3.org/ns/activitystreams#Public',
+    attributedTo: global.accountURL
   }
 
   if (ghostPost.excerpt) {
-    postPayload.spoiler_text = ghostPost.excerpt
+    postPayload.summary = ghostPost.excerpt
   } else if (ghostPost.custom_excerpt) {
-    postPayload.spoiler_text = ghostPost.custom_excerpt
+    postPayload.summary = ghostPost.custom_excerpt
   }
 
-  if (ghostPost.tags && ghostPost.tags.length > 0) {
-    postPayload.tags = ghostPost.tags.map((tag) => {
-      return `#${tag.name.replace(/\s+/, '')}`
-    })
+  // Check to see if the summary ends with punctuation, otherwise assume the text got cut off and add elipses.
+  if (postPayload.summary.match(/[\d\w]$/g)) {
+    postPayload.summary += '...'
   }
+
+  postPayload.summary = `${ghostPost.title}\n\n${postPayload.summary}`
+
+  // if (ghostPost.tags && ghostPost.tags.length > 0) {
+  //   postPayload.tags = ghostPost.tags.map((tag) => {
+  //     return `#${tag.name.replace(/\s+/, '')}`
+  //   })
+  // }
 
   return postPayload
 }
@@ -61,12 +71,14 @@ const postPublish = async function (req, res) {
       const postObject = createPost(post, req.app.get('language'))
       const postPayload = {
         '@context': 'https://www.w3.org/ns/activitystreams',
-        id: `${global.accountURL}/${postObject.id}`,
+        id: `${global.accountURL}/create-${postObject.id}`,
         type: 'Create',
         actor: global.accountURL,
         object: postObject,
-        to: [follower.follower_uri, 'https://www.w3.org/ns/activitystreams#Public']
+        to: 'https://www.w3.org/ns/activitystreams#Public'
       }
+
+      console.log(JSON.stringify(postPayload))
 
       // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
       utils.signAndSend(postPayload, { inbox: follower.follower_uri + '/inbox' })

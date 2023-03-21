@@ -13,11 +13,17 @@ const mastodonAttachments = {
 const profilePayload = {
   '@context': [
     'https://www.w3.org/ns/activitystreams',
-    'https://w3id.org/security/v1'
+    'https://w3id.org/security/v1',
+    {
+      PropertyValue: 'schema:PropertyValue',
+      value: 'schema:value'
+    }
   ],
   id: global.accountURL,
   type: 'Service', // Bots are 'Service' types
   // following: global.accountURL + '/following',
+
+  // TODO: Show followers
   // followers: global.accountURL + '/followers',
   inbox: global.inboxURL,
 
@@ -75,7 +81,7 @@ const profile = async function (req, res, next) {
   const siteData = await ghost.settings.browse()
 
   profilePayload.name = siteData.title
-  profilePayload.summary = siteData.description // TODO add h-card data?
+  profilePayload.summary = `${siteData.description}\n${global.profileURL}` // TODO add h-card data?
   profilePayload.published = req.app.get('account_created_at')
 
   profilePayload.icon = imagePayload()
