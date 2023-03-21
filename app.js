@@ -5,14 +5,14 @@ const utils = require('./utils')
 const bodyParser = require('body-parser')
 
 /** Define API paths **/
-global.actorPath = '/actors'
-global.subscribePath = '/subscribe'
+global.actorPath = `${process.env.API_ROOT_PATH}/actors`
+global.subscribePath = `${process.env.API_ROOT_PATH}/subscribe`
 /** End Define API paths **/
 
 /** Define Urls **/
-global.staticImagesPath = '/activitypub_static_images'
+global.staticImagesPath = `${process.env.API_ROOT_PATH}/activitypub_static_images`
 global.profileURL = 'https://' + utils.removeHttpURI(process.env.PROFILE_URL)
-global.accountURL = `https://${process.env.SERVER_DOMAIN}${process.env.API_ROOT_PATH}${global.actorPath}/${process.env.ACCOUNT_USERNAME}`
+global.accountURL = `https://${process.env.SERVER_DOMAIN}${global.actorPath}/${process.env.ACCOUNT_USERNAME}`
 global.inboxURL = `${global.accountURL}/inbox`
 global.outboxURL = `${global.accountURL}/outbox`
 global.followersURL = `${global.accountURL}/followers`
@@ -62,8 +62,10 @@ app.use('/.well-known/webfinger', webfingerRouter)
 app.get(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}.json`, profileHandler)
 app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
 app.use(global.staticImagesPath, express.static('img'))
-app.use('/publish', express.Router().post('/', postHandler.post))
-
+app.use(`${process.env.API_ROOT_PATH}/publish`, express.Router().post('/', postHandler.post))
+app.get('/', (req, res) => {
+  res.redirect(global.profileURL)
+})
 app.get('*', (req, res) => {
   res.status(404)
   res.send('Resource not found')
