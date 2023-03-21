@@ -11,11 +11,12 @@ const inbox = async function (req, res) {
     } else if (payload.actor && payload.type === 'Follow' && record === undefined) {
       await db.run('insert into followers (follower_uri, date_followed, date_failed) values (?, ?, null)', [payload.actor, new Date().getTime()])
     } else {
+      console.log(req.body, req.headers)
       res.status(400).send('Bad request')
       return
     }
 
-    utils.sendAcceptMessage(payload, global.accountURL, res)
+    utils.sendAcceptMessage(payload, res)
 
     res.status(200).send('Success')
   } catch (err) {

@@ -65,7 +65,7 @@ function contentTypeFromUrl (url) {
 
 const profile = async function (req, res, next) {
   // If a web browser is requesting the profile, redirect to the Ghost website
-  if (req.get('Accept').includes('text/html')) {
+  if (req.get('Accept').includes('text/html') && !req.path.endsWith('.json')) {
     res.redirect(global.profileURL)
     return
   }

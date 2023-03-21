@@ -1,5 +1,4 @@
 const express = require('express')
-// const path = require('path')
 const logger = require('morgan')
 const GhostContentAPI = require('@tryghost/content-api')
 const utils = require('./utils')
@@ -26,6 +25,8 @@ global.accountNotFoundMsg = 'Account not found'
 
 const webfingerRouter = require('./routes/webfinger')
 const actorRouter = require('./routes/actor')
+const postHandler = require('./routes/post')
+const profileHandler = require('./routes/profile')
 
 const app = express()
 
@@ -58,8 +59,10 @@ app.use((req, res, next) => {
 })
 
 app.use('/.well-known/webfinger', webfingerRouter)
+app.get(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}.json`, profileHandler)
 app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
 app.use(global.staticImagesPath, express.static('img'))
+app.use('/publish', express.Router().post('/', postHandler.post))
 
 app.get('*', (req, res) => {
   res.status(404)

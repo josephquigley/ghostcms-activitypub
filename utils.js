@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3')
 const fs = require('fs')
 const crypto = require('crypto')
 const promisify = require('util').promisify
-const request = promisify(require('request'))
+const postJSON = require('bent')('POST', 'json', { 'Content-Type': 'application/activity+json' }, 200, 202)
 
 const dataDir = 'data'
 const certsDir = `${dataDir}/certs`
@@ -57,9 +57,10 @@ function createTables (db) {
     `)
 }
 
-function signAndSend (message, res) {
-  // get the URI of the actor object and append 'inbox' to it
-  const inbox = new URL(message.object.actor + '/inbox')
+async function signAndSend (message, params) {
+  // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
+  // TODO: Sign all requests for remote data as well
+  const inbox = params.inbox ? new URL(params.inbox) : new URL(message.object.actor + '/inbox')
 
   const digestHash = crypto.createHash('sha256').update(JSON.stringify(message)).digest('base64')
   const signer = crypto.createSign('sha256')
@@ -69,26 +70,31 @@ function signAndSend (message, res) {
   signer.end()
   const signature = signer.sign(privateKey)
   const signatureB64 = signature.toString('base64')
-  const header = `keyId="${global.accountURL}",headers="(request-target) host date digest",signature="${signatureB64}"`
-  request({
-    url: inbox.toString(),
-    headers: {
-      Host: inbox.hostname,
-      Date: d.toUTCString(),
-      Digest: `SHA-256=${digestHash}`,
-      Signature: header
-    },
-    method: 'POST',
-    json: true,
-    body: message
-  }, function (error, response) {
-    if (error) {
-      console.error('Error signing message:', error, response.body)
-    } else {
-      console.log('Sign response:', response.body)
+  const header = `keyId="${global.accountURL}/public_key",headers="(request-target) host date digest",signature="${signatureB64}"`
+
+  const headers = {
+    Host: inbox.hostname,
+    Date: d.toUTCString(),
+    Digest: `SHA-256=${digestHash}`,
+    Signature: header,
+    'Content-Type': 'application/activity+json',
+    Accept: 'application/activity+json'
+  }
+
+  try {
+    const response = await postJSON(inbox.toString(), message, headers)
+    console.log('Sign response:', response)
+  } catch (err) {
+    // Mastodon sends back an empty response, which breaks JSON parsing in the bent library
+    if (err instanceof SyntaxError) {
+      return
     }
-  })
-  return res.status(200)
+    console.error('Error sending signed message:', err.statusCode, err.message)
+  }
+
+  if (params.res) {
+    return params.res.status(200)
+  }
 }
 
 function removeHttpURI (str) {
@@ -103,14 +109,19 @@ module.exports = {
   privateKey,
   signAndSend,
 
-  sendAcceptMessage: function (object, id, res) {
+  sendAcceptMessage: async function (object, id, res) {
+    if (typeof id !== 'string' && !res) {
+      id = null
+    }
+    // Need a guid otherwise Mastodon returns a 401 for some reason
+    const guid = crypto.randomBytes(16).toString('hex')
     const message = {
       '@context': 'https://www.w3.org/ns/activitystreams',
-      id,
+      id: (id || `${global.accountURL}/${guid}`),
       type: 'Accept',
       actor: `${global.accountURL}`,
       object
     }
-    signAndSend(message, res)
+    await signAndSend(message, { res })
   }
 }

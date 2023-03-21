@@ -9,12 +9,12 @@
   },
   "dependencies": {
     "@tryghost/content-api": "^1.11.7",
+    "bent": "^7.3.12",
     "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "morgan": "~1.9.1",
-    "request": "^2.88.2",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
