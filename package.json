@@ -1,7 +1,11 @@
 {
   "name": "ghostcms-activitypub",
-  "version": "0.0.1",
+  "version": "0.1",
   "private": true,
+  "license" : {
+    "type" : "MIT",
+    "url" : "https://opensource.org/licenses/MIT"
+  },
   "scripts": {
     "start": "node gen_keys.js && node ./bin/www",
     "lint": "npx eslint --fix app.js utils.js routes/",
