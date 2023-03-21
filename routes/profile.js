@@ -81,7 +81,7 @@ const profile = async function (req, res, next) {
   const siteData = await ghost.settings.browse()
 
   profilePayload.name = siteData.title
-  profilePayload.summary = `${siteData.description}\n${global.profileURL}` // TODO add h-card data?
+  profilePayload.summary = `${siteData.description}\n<br/><a href="${global.profileURL}">${global.profileURL}</a>` // TODO add h-card data?
   profilePayload.published = req.app.get('account_created_at')
 
   profilePayload.icon = imagePayload()

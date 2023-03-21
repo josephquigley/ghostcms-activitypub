@@ -31,7 +31,7 @@ if (!process.env.API_ROOT_PATH.startsWith('/')) {
 process.env.API_ROOT_PATH = process.env.API_ROOT_PATH.replace(/\/\s*$/g, '')
 
 if (process.env.SERVER_DOMAIN === '') {
-  throw new Error('.env SERVER_DOMAIN value is required. Got empty.')
+  process.env.SERVER_DOMAIN = process.env.GHOST_SERVER
 }
 process.env.SERVER_DOMAIN = utils.removeHttpURI(process.env.SERVER_DOMAIN).replace(/\/\s*$/g, '')
 

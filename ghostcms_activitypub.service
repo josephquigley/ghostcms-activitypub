@@ -1,0 +1,21 @@
+[Unit]
+Description=GhostCMS ActivityPub Server
+
+[Service]
+
+# make sure this user and group exist and have read and write permissions in your GhostCMS ActivityPub server folder.
+# if they do not exist yet create them with "sudo useradd -r username_here"
+# then give them permission with "chown -R username_here:username_here /ghostcms_activitypub_path" (path to your GhostCMS ActivityPub server folder)
+# you can adjust the users name according to your setup
+User=
+Group=
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/bin/npm --prefix /ghostcms_activitypub_path start
+User=username_here
+
+[Install]
+WantedBy=multi-user.target

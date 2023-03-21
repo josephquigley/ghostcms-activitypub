@@ -1,7 +1,7 @@
 const utils = require('../utils')
 
 function createPost (ghostPost, language) {
-  const id = `https://${process.env.SERVER_DOMAIN}${process.env.API_ROOT_PATH}${global.actorPath}/${process.env.ACCOUNT_USERNAME}/${ghostPost.id}`
+  const id = `https://${process.env.SERVER_DOMAIN}${global.actorPath}/${process.env.ACCOUNT_USERNAME}/${ghostPost.id}`
 
   const postPayload = {
     id,
