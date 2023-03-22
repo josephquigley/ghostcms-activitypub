@@ -4,6 +4,9 @@ This is a simple ExpressJS server that integrates with GhostCMS webhooks and imp
 ## Mandatory Warning
 This project is currently experimental and should be used with caution, as only happy-path, Mastodon-compatible interaction has been tested. Although it should be safe to run after configuration, do not experiment with this code or config on your primary domain as you might find yourself ban-listed by a Mastodon instance for spam, should anything go wrong. Consider hosting locally and proxying via [ngrok](https://ngrok.com) to create a throw-away domain.
 
+## Issues and Feature Requests
+Feature requests and bugs can be tracked and reported at this project's [Codeberg issue](https://codeberg.org/quigs/ghostcms-activitypub/issues) tracker.
+
 ## Installation
 Download and install Node.js. This project has only been tested on Node.js 19, but earlier versions may be compatible.
 Installation is done using the npm install command:
