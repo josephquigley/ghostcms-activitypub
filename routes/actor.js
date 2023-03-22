@@ -1,5 +1,5 @@
 const express = require('express')
-const post = require('./post')
+const Post = require('./post')
 const profile = require('./profile')
 const outbox = require('./outbox')
 const inbox = require('./inbox')
@@ -13,7 +13,7 @@ module.exports = express.Router()
   .get('/inbox', (req, res) => {
     res.status(501).send('Not implemented')
   })
-  .get('/:postId', post.get)
+  .get('/:postId', Post.routers.get)
   .post('/inbox', inbox)
   .post('/outbox', (req, res) => {
     res.status(501).send('Not implemented')

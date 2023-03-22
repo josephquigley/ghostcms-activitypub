@@ -17,6 +17,8 @@ global.inboxURL = `${global.accountURL}/inbox`
 global.outboxURL = `${global.accountURL}/outbox`
 global.followersURL = `${global.accountURL}/followers`
 global.publicKeyPath = `${global.accountURL}/public_key`
+global.tagsPath = `${process.env.API_ROOT_PATH}/tags`
+global.tagsURL = `https://${process.env.SERVER_DOMAIN}${global.tagsPath}`
 /** End Define Urls **/
 
 /** Define Common Messages **/
@@ -25,8 +27,9 @@ global.accountNotFoundMsg = 'Account not found'
 
 const webfingerRouter = require('./routes/webfinger')
 const actorRouter = require('./routes/actor')
-const postHandler = require('./routes/post')
+const Post = require('./routes/post')
 const profileHandler = require('./routes/profile')
+const Tags = require('./routes/tags')
 
 const app = express()
 
@@ -62,7 +65,9 @@ app.use('/.well-known/webfinger', webfingerRouter)
 app.get(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}.json`, profileHandler)
 app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
 app.use(global.staticImagesPath, express.static('img'))
-app.use(`${process.env.API_ROOT_PATH}/publish`, express.Router().post('/', postHandler.post))
+app.use(`${process.env.API_ROOT_PATH}/publish`, express.Router().post('/', Post.routers.publish))
+app.use(global.tagsPath, Tags.router)
+
 app.get('/', (req, res) => {
   res.redirect(global.profileURL)
 })

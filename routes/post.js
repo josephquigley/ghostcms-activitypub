@@ -1,9 +1,16 @@
 const utils = require('../utils')
+const Tag = require('./tags')
 
 function createPost (ghostPost, language) {
   const id = `https://${process.env.SERVER_DOMAIN}${global.actorPath}/${process.env.ACCOUNT_USERNAME}/${ghostPost.id}`
 
   const postPayload = {
+    '@context': [
+      'https://www.w3.org/ns/activitystreams',
+      {
+        Hashtag: 'as:Hashtag'
+      }
+    ],
     id,
     published: ghostPost.published_at,
     sensitive: false,
@@ -15,7 +22,11 @@ function createPost (ghostPost, language) {
     content: ghostPost.html,
     type: 'Article',
     to: 'https://www.w3.org/ns/activitystreams#Public',
-    attributedTo: global.accountURL
+    cc: [
+      `${global.followersURL}`
+    ],
+    attributedTo: global.accountURL,
+    tag: []
   }
 
   if (ghostPost.excerpt) {
@@ -31,11 +42,9 @@ function createPost (ghostPost, language) {
 
   postPayload.summary = `${ghostPost.title}\n\n${postPayload.summary}`
 
-  // if (ghostPost.tags && ghostPost.tags.length > 0) {
-  //   postPayload.tags = ghostPost.tags.map((tag) => {
-  //     return `#${tag.name.replace(/\s+/, '')}`
-  //   })
-  // }
+  if (ghostPost.tags && ghostPost.tags.length > 0) {
+    postPayload.tag = ghostPost.tags.map(Tag.createTagPayload)
+  }
 
   return postPayload
 }
@@ -52,9 +61,13 @@ const postGet = async function (req, res) {
     const post = await ghost.posts.read({ id: postId, include: 'tags' }, { formats: ['html'] })
 
     res.json(createPost(post, req.app.get('language')))
-  } catch (e) {
-    // TODO send 500 error if ghost post call fails
-    res.status(404).send(e.message)
+  } catch (err) {
+    if (err.response) {
+      res.status(err.response.status).send(err.response.statusText)
+    } else {
+      console.error(err)
+      res.status(500).send('Unable to fetch post.')
+    }
   }
 }
 
@@ -78,8 +91,6 @@ const postPublish = async function (req, res) {
         to: 'https://www.w3.org/ns/activitystreams#Public'
       }
 
-      console.log(JSON.stringify(postPayload))
-
       // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
       utils.signAndSend(postPayload, { inbox: follower.follower_uri + '/inbox' })
     })
@@ -91,4 +102,10 @@ const postPublish = async function (req, res) {
   }
 }
 
-module.exports = { get: postGet, post: postPublish }
+module.exports = {
+  routers: {
+    get: postGet,
+    publish: postPublish
+  },
+  createPost
+}

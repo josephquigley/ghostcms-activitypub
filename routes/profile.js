@@ -16,11 +16,10 @@ const profilePayload = {
     'https://w3id.org/security/v1',
     {
       PropertyValue: 'schema:PropertyValue',
-      value: 'schema:value'
-    },
-    {
-      "toot": "http://joinmastodon.org/ns#",
-      "discoverable": "toot:discoverable"
+      value: 'schema:value',
+      toot: 'http://joinmastodon.org/ns#',
+      discoverable: 'toot:discoverable',
+      Hashtag: 'as:Hashtag'
     }
   ],
   id: global.accountURL,
@@ -74,8 +73,10 @@ function contentTypeFromUrl (url) {
 }
 
 const profile = async function (req, res, next) {
+  const shouldForwardHTMLToGhost = process.env.NODE_ENV === 'production' || req.query.forward
+
   // If a web browser is requesting the profile, redirect to the Ghost website
-  if (req.get('Accept').includes('text/html') && !req.path.endsWith('.json')) {
+  if (req.get('Accept').includes('text/html') && !req.path.endsWith('.json') && shouldForwardHTMLToGhost) {
     res.redirect(global.profileURL)
     return
   }
