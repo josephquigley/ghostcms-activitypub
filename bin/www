@@ -7,6 +7,12 @@
 // Load config
 require('dotenv').config()
 const utils = require('../utils')
+const fs = require('fs')
+
+if (!fs.existsSync('.env')) {
+  console.error('ERROR: .env file is missing')
+  process.exit(1)
+}
 
 /** Sanitize user inputs **/
 if (process.env.GHOST_SERVER === '') {
