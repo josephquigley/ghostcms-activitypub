@@ -92,7 +92,7 @@ async function signAndSend (message, params) {
   const stringToSign = `(request-target): post ${inbox.pathname}\nhost: ${inbox.hostname}\ndate: ${d.toUTCString()}\ndigest: SHA-256=${digestHash}`
   signer.update(stringToSign)
   signer.end()
-  const signature = signer.sign(privateKey)
+  const signature = signer.sign(privateKey())
   const signatureB64 = signature.toString('base64')
   const header = `keyId="${global.accountURL}/public_key",headers="(request-target) host date digest",signature="${signatureB64}"`
 
