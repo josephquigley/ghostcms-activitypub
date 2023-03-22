@@ -9,14 +9,36 @@ const certsDir = `${dataDir}/certs`
 const dbName = 'database.db'
 const dbPath = `${dataDir}/${dbName}`
 
+let _privateKey = ''
+let _pubKey = ''
+
+const pubKey = () => {
+  if (_pubKey === '') {
+    try {
+      _pubKey = fs.readFileSync(certs.publicKeyPath, 'utf8')
+    } catch (err) {
+      return ''
+    }
+  }
+  return _pubKey
+}
+
+const privateKey = () => {
+  if (_privateKey === '') {
+    try {
+      _privateKey = fs.readFileSync(certs.privateKeyPath, 'utf8')
+    } catch (err) {
+      return ''
+    }
+  }
+  return _pubKey
+}
+
 const certs = {
   dir: certsDir,
   privateKeyPath: `${certsDir}/key.pem`,
   publicKeyPath: `${certsDir}/pubkey.pem`
 }
-
-const pubKey = fs.readFileSync(certs.publicKeyPath, 'utf8')
-const privateKey = fs.readFileSync(certs.privateKeyPath, 'utf8')
 
 function createDatabase () {
   const newDb = new sqlite3.Database(dbPath, (err) => {
@@ -105,9 +127,21 @@ function removeHttpURI (str) {
 module.exports = {
   removeHttpURI,
   certs,
-  db: openDatabase(),
-  pubKey,
-  privateKey,
+  db: openDatabase,
+
+  // Cache the keys so that the disk doesn't have to be read on each ActivityPub request
+  pubKey: () => {
+    if (_pubKey === '') {
+      _pubKey = pubKey()
+    }
+    return _pubKey
+  },
+  privateKey: () => {
+    if (_privateKey === '') {
+      _privateKey = privateKey()
+    }
+    return _privateKey
+  },
   signAndSend,
 
   sendAcceptMessage: async function (object, id, res) {

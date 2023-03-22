@@ -2,23 +2,6 @@ const exec = require("child_process").exec
 const fs = require("fs")
 const certs = require('./utils').certs
 
-fs.access(certs.dir, (error) => {
-    // To check if the given directory 
-    // already exists or not
-    if (error) {
-        // If current directory does not exist
-        // then create it
-        fs.mkdir(certs.dir, (error) => {
-        if (error) {
-            console.error(error);
-            process.exit(1)
-        } else {
-            console.log("Created certs directory.");
-        }
-        });
-    }
-})
-
 function run(shellCommand) {
     exec(shellCommand, (error, stdout, stderr) => {
         if (error) {
@@ -33,23 +16,22 @@ function run(shellCommand) {
         if (stderr) {
             console.log(stderr)
         }
-
-        
     })
 }
 
-fs.access(certs.privateKeyPath, (error) => {
-    if (error) {
+try {
+    if (!fs.existsSync(certs.dir)) {
+        fs.mkdirSync(certs.dir, { recursive: true })
+    }
+    
+    if (!fs.existsSync(certs.privateKeyPath)) {
         // If the private key does not exist then create it
-        run(`openssl genrsa -out ${certs.privateKeyPath}`)
+        run(`openssl genrsa -out ${certs.privateKeyPath} && openssl rsa -in ${certs.privateKeyPath} -pubout -out ${certs.publicKeyPath}`)
     }
 
-    fs.access(certs.publicKeyPath, (error) => {
-        if (error) {
-            // If the public key does not exist then create it
-            run(`openssl rsa -in ${certs.privateKeyPath} -pubout -out ${certs.publicKeyPath}`)
-        }
-    })
-})
+} catch(err) {
+    console.error(err)
+    process.exit(1)
+}
 
 process.exit(0)

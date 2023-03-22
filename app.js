@@ -42,7 +42,7 @@ const ghost = new GhostContentAPI({
 })
 
 app.set('ghost', ghost)
-app.set('db', utils.db)
+app.set('db', utils.db())
 
 function setAccountCreationDate (dateStr) {
   app.set('account_created_at', dateStr)

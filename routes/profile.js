@@ -41,7 +41,7 @@ const profilePayload = {
   publicKey: {
     id: global.publicKeyPath,
     owner: global.accountURL,
-    publicKeyPem: utils.pubKey
+    publicKeyPem: utils.pubKey()
   }
 }
 
