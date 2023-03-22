@@ -3,6 +3,7 @@
 /**
  * Module dependencies.
  */
+require('../gen_keys')
 
 // Load config
 require('dotenv').config()

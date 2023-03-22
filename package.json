@@ -7,9 +7,9 @@
     "url" : "https://opensource.org/licenses/MIT"
   },
   "scripts": {
-    "start": "node gen_keys.js && node ./bin/www",
+    "start": "NODE_ENV=production node ./bin/www",
     "lint": "npx eslint --fix app.js utils.js routes/",
-    "dev": "npm run lint && NODE_ENV=dev DEBUG=ghostcms-activitypub:* npm start"
+    "dev": "npm run lint && NODE_ENV=development DEBUG=ghostcms-activitypub:* node ./bin/www"
   },
   "dependencies": {
     "@tryghost/content-api": "^1.11.7",
