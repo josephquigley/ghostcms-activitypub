@@ -31,7 +31,7 @@ const privateKey = () => {
       return ''
     }
   }
-  return _pubKey
+  return _privateKey
 }
 
 const certs = {
