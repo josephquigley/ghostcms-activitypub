@@ -9,13 +9,10 @@ Description=GhostCMS ActivityPub Server
 # you can adjust the users name according to your setup
 User=
 Group=
-
-[Service]
 Type=simple
 Restart=always
 RestartSec=1
 ExecStart=/bin/npm --prefix /ghostcms_activitypub_path start
-User=username_here
 
 [Install]
 WantedBy=multi-user.target
