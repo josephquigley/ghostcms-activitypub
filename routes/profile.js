@@ -17,6 +17,10 @@ const profilePayload = {
     {
       PropertyValue: 'schema:PropertyValue',
       value: 'schema:value'
+    },
+    {
+      "toot": "http://joinmastodon.org/ns#",
+      "discoverable": "toot:discoverable"
     }
   ],
   id: global.accountURL,
