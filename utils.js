@@ -84,9 +84,7 @@ async function signAndSend (message, params) {
   // TODO: Sign all requests for remote data as well
   const inbox = params.inbox ? new URL(params.inbox) : new URL(message.object.actor + '/inbox')
 
-  message = JSON.stringify(message)
-
-  const digestHash = crypto.createHash('sha256').update(message).digest('base64')
+  const digestHash = crypto.createHash('sha256').update(JSON.stringify(message)).digest('base64')
   const signer = crypto.createSign('sha256')
   const d = new Date()
   const stringToSign = `(request-target): post ${inbox.pathname}\nhost: ${inbox.hostname}\ndate: ${d.toUTCString()}\ndigest: SHA-256=${digestHash}`
@@ -127,6 +125,25 @@ function removeHttpURI (str) {
   return str.replace(/^http[s]*:\/\//, '')
 }
 
+function createNotification (type, object, notificationId, to, cc) {
+  // Need a guid for some activities otherwise Mastodon returns a 401 for some reason on follower inbox POSTs
+  notificationId = notificationId || `${global.accountURL}/${type.replace(/[\s]+/g, '').toLowerCase()}-${crypto.randomBytes(16).toString('hex')}`
+  const payload = {
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    id: notificationId,
+    type,
+    actor: global.accountURL,
+    object,
+    to: to || 'https://www.w3.org/ns/activitystreams#Public'
+  }
+
+  if (cc) {
+    payload.cc = cc
+  }
+
+  return payload
+}
+
 module.exports = {
   removeHttpURI,
   certs,
@@ -149,19 +166,9 @@ module.exports = {
   },
   signAndSend,
 
-  sendAcceptMessage: async function (object, id, res) {
-    if (typeof id !== 'string' && !res) {
-      id = null
-    }
-    // Need a guid otherwise Mastodon returns a 401 for some reason
-    const guid = crypto.randomBytes(16).toString('hex')
-    const message = {
-      '@context': 'https://www.w3.org/ns/activitystreams',
-      id: (id || `${global.accountURL}/${guid}`),
-      type: 'Accept',
-      actor: `${global.accountURL}`,
-      object
-    }
-    await signAndSend(message, { res })
-  }
+  sendAcceptMessage: async function (object, res) {
+    await signAndSend(createNotification('Accept', object), { res })
+  },
+
+  createNotification
 }

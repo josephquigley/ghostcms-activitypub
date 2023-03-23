@@ -2,9 +2,9 @@
   "name": "ghostcms-activitypub",
   "version": "0.1",
   "private": true,
-  "license" : {
-    "type" : "MIT",
-    "url" : "https://opensource.org/licenses/MIT"
+  "license": {
+    "type": "MIT",
+    "url": "https://opensource.org/licenses/MIT"
   },
   "scripts": {
     "start": "NODE_ENV=production node ./bin/www",

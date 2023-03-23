@@ -95,20 +95,6 @@ async function getFollowersAsync (db) {
   return await db.all('select follower_uri from followers')
 }
 
-function createNotification (type, object, notificationId) {
-  return {
-    '@context': 'https://www.w3.org/ns/activitystreams',
-    id: `${global.accountURL}/${type.replace(/[\s]+/g, '').toLowerCase()}-${notificationId}`,
-    type,
-    actor: global.accountURL,
-    object,
-    to: 'https://www.w3.org/ns/activitystreams#Public',
-    cc: [
-      `${global.followersURL}`
-    ]
-  }
-}
-
 const postGetRoute = async function (req, res) {
   const postId = req.params.postId
   if (!postId) {
@@ -149,7 +135,7 @@ const postPublishRoute = async function (req, res) {
 
     followers.forEach(async (follower) => {
     // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
-      utils.signAndSend(createNotification('Create', postObject, post.id), { inbox: follower.follower_uri + '/inbox' })
+      utils.signAndSend(utils.createNotification('Create', postObject, post.id), { inbox: follower.follower_uri + '/inbox' })
     })
 
     res.status(200).send()
@@ -164,19 +150,16 @@ const postDeleteRoute = async function (req, res) {
     res.status(401).send()
     return
   }
-
-  const ghost = req.app.get('ghost')
   const db = req.app.get('db')
 
   try {
     const followers = await getFollowersAsync(db)
-    const language = await getLanguageAsync(ghost)
-    const post = req.body.post.id ? req.body.post : req.body.post.previous
-    const postObject = createPostPayload(post, language)
+    console.log(req.body)
+    const postId = req.body.post.id || req.body.post.previous.id
 
     followers.forEach(async (follower) => {
     // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
-      utils.signAndSend(createNotification('Delete', postObject, post.id), { inbox: follower.follower_uri + '/inbox' })
+      utils.signAndSend(utils.createNotification('Delete', `${global.accountURL}/${postId}`, postId), { inbox: follower.follower_uri + '/inbox' })
     })
 
     res.status(200).send()
