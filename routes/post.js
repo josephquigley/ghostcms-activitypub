@@ -35,12 +35,14 @@ function createPostPayload (ghostPost, language) {
     postPayload.content = ghostPost.custom_excerpt
   }
 
-  postPayload.content = `${ghostPost.title}\n\n${postPayload.content}`
+  postPayload.content = `${ghostPost.title}<br/><br/>${postPayload.content}`
 
   // Check to see if the summary ends with punctuation, otherwise assume the text got cut off and add elipses.
-  if (postPayload.content.match(/[\d\w]$/g) && postPayload.content.length > 500) {
+  if (postPayload.content.match(/[\d\w]$/g)) {
     postPayload.content += '...'
   }
+
+  postPayload.content += ghostPost.url
 
   if (ghostPost.tags && ghostPost.tags.length > 0) {
     postPayload.tag = ghostPost.tags.map(Tag.createTagPayload)
