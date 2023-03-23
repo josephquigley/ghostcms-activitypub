@@ -20,7 +20,7 @@ function createPostPayload (ghostPost, language) {
     uri: id,
     url: ghostPost.url,
     content: null,
-    type: 'Note',
+    type: 'Article',
     to: 'https://www.w3.org/ns/activitystreams#Public',
     cc: [
       `${global.followersURL}`
@@ -30,25 +30,23 @@ function createPostPayload (ghostPost, language) {
   }
 
   if (ghostPost.excerpt) {
-    postPayload.content = ghostPost.excerpt
+    postPayload.summary = ghostPost.excerpt
   } else if (ghostPost.custom_excerpt) {
-    postPayload.content = ghostPost.custom_excerpt
+    postPayload.summary = ghostPost.custom_excerpt
   }
 
-  postPayload.content = `${ghostPost.title}<br/><br/>${postPayload.content}`
+  postPayload.summary = `${ghostPost.title}<br/><br/>${postPayload.summary}`
 
   // Check to see if the summary ends with punctuation, otherwise assume the text got cut off and add elipses.
-  if (postPayload.content.match(/[\d\w]$/g)) {
-    postPayload.content += '...'
+  if (postPayload.summary.match(/[\d\w]$/g)) {
+    postPayload.summary += '...'
   }
-
-  postPayload.content += `<br/><a href="${ghostPost.url} target="_blank">${ghostPost.url}</a>`
 
   if (ghostPost.tags && ghostPost.tags.length > 0) {
     postPayload.tag = ghostPost.tags.map(Tag.createTagPayload)
 
-    postPayload.content += '<br/><br/>'
-    postPayload.content += ghostPost.tags.map(Tag.createTagHtml)
+    postPayload.summary += '<br/><br/>'
+    postPayload.summary += ghostPost.tags.map(Tag.createTagHtml)
   }
 
   return postPayload
