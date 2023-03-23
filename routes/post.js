@@ -42,7 +42,7 @@ function createPostPayload (ghostPost, language) {
     postPayload.content += '...'
   }
 
-  postPayload.content += `<br/><a href="${ghostPost.url} rel="nofollow noopener noreferrer" target="_blank">${ghostPost.url}</a>`
+  postPayload.content += `<br/><a href="${ghostPost.url} target="_blank">${ghostPost.url}</a>`
 
   if (ghostPost.tags && ghostPost.tags.length > 0) {
     postPayload.tag = ghostPost.tags.map(Tag.createTagPayload)
