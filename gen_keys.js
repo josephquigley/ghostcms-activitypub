@@ -23,10 +23,6 @@ function run(shellCommand) {
 }
 
 try {
-    if (!fs.existsSync(utils.apiKeyPath)) {
-        fs.writeFileSync(utils.apiKeyPath, crypto.randomUUID())
-    }
-
     if (!fs.existsSync(certs.dir)) {
         fs.mkdirSync(certs.dir, { recursive: true })
     }
@@ -34,6 +30,10 @@ try {
     if (!fs.existsSync(certs.privateKeyPath)) {
         // If the private key does not exist then create it
         run(`openssl genrsa -out ${certs.privateKeyPath} && openssl rsa -in ${certs.privateKeyPath} -pubout -out ${certs.publicKeyPath}`)
+    }
+
+    if (!fs.existsSync(utils.apiKeyPath)) {
+        fs.writeFileSync(utils.apiKeyPath, crypto.randomUUID())
     }
 
 } catch(err) {

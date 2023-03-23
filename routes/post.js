@@ -16,9 +16,9 @@ function createPostPayload (ghostPost, language) {
     sensitive: false,
     summary: null,
     visibility: 'public',
-    language,
+    language: language || global.language,
     uri: id,
-    url: ghostPost.url,
+    url: ghostPost.url || null,
     content: null,
     type: 'Article',
     to: 'https://www.w3.org/ns/activitystreams#Public',
@@ -48,15 +48,16 @@ function createPostPayload (ghostPost, language) {
 
   postPayload.content = ghostPost.html
 
-  return JSON.stringify(postPayload)
+  return postPayload
 }
 
-let language = null
+global.language = null
 async function getLanguageAsync (ghostAPI) {
-  if (!language) {
-    language = await ghostAPI.settings.browse().lang
+  if (!global.language) {
+    const settings = await ghostAPI.settings.browse()
+    global.language = settings.lang
   }
-  return language
+  return global.language
 }
 
 const POST_QUERY_LIMIT = 10
@@ -94,10 +95,10 @@ async function getFollowersAsync (db) {
   return await db.all('select follower_uri from followers')
 }
 
-function createNotification (type, object) {
-  return JSON.stringify({
+function createNotification (type, object, notificationId) {
+  return {
     '@context': 'https://www.w3.org/ns/activitystreams',
-    id: `${global.accountURL}/${type.replace(/[\s]+/g, '').toLowerCase()}-${object.id}`,
+    id: `${global.accountURL}/${type.replace(/[\s]+/g, '').toLowerCase()}-${notificationId}`,
     type,
     actor: global.accountURL,
     object,
@@ -105,7 +106,7 @@ function createNotification (type, object) {
     cc: [
       `${global.followersURL}`
     ]
-  })
+  }
 }
 
 const postGetRoute = async function (req, res) {
@@ -148,7 +149,7 @@ const postPublishRoute = async function (req, res) {
 
     followers.forEach(async (follower) => {
     // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
-      utils.signAndSend(createNotification('Create', postObject), { inbox: follower.follower_uri + '/inbox' })
+      utils.signAndSend(createNotification('Create', postObject, post.id), { inbox: follower.follower_uri + '/inbox' })
     })
 
     res.status(200).send()
@@ -170,12 +171,12 @@ const postDeleteRoute = async function (req, res) {
   try {
     const followers = await getFollowersAsync(db)
     const language = await getLanguageAsync(ghost)
-    const post = req.body.post.id ? req.body.post : req.body.post.current
+    const post = req.body.post.id ? req.body.post : req.body.post.previous
     const postObject = createPostPayload(post, language)
 
     followers.forEach(async (follower) => {
     // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
-      utils.signAndSend(createNotification('Destroy', postObject), { inbox: follower.follower_uri + '/inbox' })
+      utils.signAndSend(createNotification('Delete', postObject, post.id), { inbox: follower.follower_uri + '/inbox' })
     })
 
     res.status(200).send()

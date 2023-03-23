@@ -31,7 +31,7 @@ const webfingerPayload = {
 }
 
 /* Static webfinger for the Ghost activitypub account. */
-router.get('/', function (req, res, next) {
+router.get('/webfinger', function (req, res, next) {
   const resource = req.query.resource
 
   res.set('Access-Control-Allow-Methods', 'GET')
@@ -44,14 +44,23 @@ router.get('/', function (req, res, next) {
 
   const account = resource.replace(/^acct:/, '')
 
-  const debugAccount = process.env.NODE_ENV === 'dev' && account === process.env.ACCOUNT_USERNAME + '@' + process.env.SERVER_DOMAIN
-
-  if (account === process.env.ACCOUNT_USERNAME + '@' + process.env.GHOST_SERVER || debugAccount) {
+  if (account === (process.env.ACCOUNT_USERNAME + '@' + process.env.SERVER_DOMAIN)) {
     res.json(webfingerPayload)
   } else {
     res.status(404)
     res.send(global.accountNotFoundMsg)
   }
+})
+
+router.get('/host-meta', function (req, res, next) {
+  res.set('Access-Control-Allow-Methods', 'GET')
+  res.set('Content-Type', 'application/xml')
+  res.send(`
+  <?xml version="1.0" encoding="UTF-8"?>
+  <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
+    <Link rel="lrdd" template="https://${process.env.SERVER_DOMAIN}/.well-known/webfinger?resource={uri}"/>
+  </XRD>  
+  `)
 })
 
 module.exports = router

@@ -26,7 +26,7 @@ global.tagsURL = `https://${process.env.SERVER_DOMAIN}${global.tagsPath}`
 global.accountNotFoundMsg = 'Account not found'
 /** End Define Common Messages **/
 
-const webfingerRouter = require('./routes/webfinger')
+const wellKnownRouter = require('./routes/wellKnown')
 const actorRouter = require('./routes/actor')
 const Post = require('./routes/post')
 const profileHandler = require('./routes/profile')
@@ -62,7 +62,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/.well-known/webfinger', webfingerRouter)
+app.use('/.well-known', wellKnownRouter)
 app.get(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}.json`, profileHandler)
 app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
 app.use(global.staticImagesPath, express.static('img'))

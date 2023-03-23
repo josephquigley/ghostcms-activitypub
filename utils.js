@@ -106,6 +106,9 @@ async function signAndSend (message, params) {
   }
 
   try {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Signing and sending: ', inbox.toString(), message, headers)
+    }
     await postJSON(inbox.toString(), message, headers)
   } catch (err) {
     // Mastodon sends back an empty response, which breaks JSON parsing in the bent library

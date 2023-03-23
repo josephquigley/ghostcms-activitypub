@@ -56,7 +56,6 @@ async function tagCollectionRoute (req, res) {
     }
 
     const postsForTag = await ghost.posts.browse({ limit: 10, filter: `tag:${slug}`, formats: ['html'] })
-    console.log(postsForTag)
 
     res.json(createTagCollectionPayload(tagData, postsForTag))
   } catch (err) {
