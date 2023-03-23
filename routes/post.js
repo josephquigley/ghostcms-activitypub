@@ -20,7 +20,7 @@ function createPostPayload (ghostPost, language) {
     uri: id,
     url: ghostPost.url,
     content: null,
-    type: 'Article',
+    type: 'Note',
     to: 'https://www.w3.org/ns/activitystreams#Public',
     cc: [
       `${global.followersURL}`
