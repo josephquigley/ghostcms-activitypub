@@ -35,7 +35,7 @@ function createPostPayload (ghostPost, language) {
     postPayload.summary = ghostPost.custom_excerpt
   }
 
-  postPayload.summary = `${ghostPost.title}<br/><br/>${postPayload.summary}`
+  postPayload.summary = `${ghostPost.title}\n\n${postPayload.summary}`
 
   // Check to see if the summary ends with punctuation, otherwise assume the text got cut off and add elipses.
   if (postPayload.summary.match(/[\d\w]$/g)) {
@@ -44,10 +44,9 @@ function createPostPayload (ghostPost, language) {
 
   if (ghostPost.tags && ghostPost.tags.length > 0) {
     postPayload.tag = ghostPost.tags.map(Tag.createTagPayload)
-
-    postPayload.summary += '<br/><br/>'
-    postPayload.summary += ghostPost.tags.map(Tag.createTagHtml)
   }
+
+  postPayload.content = ghostPost.html
 
   return postPayload
 }
