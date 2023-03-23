@@ -1,6 +1,8 @@
 const exec = require("child_process").exec
 const fs = require("fs")
-const certs = require('./utils').certs
+const { dataDir } = require("./utils")
+const utils = require('./utils')
+const certs = utils.certs
 
 function run(shellCommand) {
     exec(shellCommand, (error, stdout, stderr) => {
@@ -20,6 +22,10 @@ function run(shellCommand) {
 }
 
 try {
+    if (!fs.existsSync(utils.apiKeyPath)) {
+        fs.writeFileSync(utils.apiKeyPath, crypto.randomUUID())
+    }
+
     if (!fs.existsSync(certs.dir)) {
         fs.mkdirSync(certs.dir, { recursive: true })
     }

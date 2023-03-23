@@ -131,6 +131,11 @@ const postGetRoute = async function (req, res) {
 }
 
 const postPublishRoute = async function (req, res) {
+  if (req.query.apiKey != req.app.get('apiKey')) { // eslint-disable-line eqeqeq
+    res.status(401).send()
+    return
+  }
+  
   const postId = req.body.post.id ? req.body.post.id : req.body.post.current.id
   const ghost = req.app.get('ghost')
   const db = req.app.get('db')
@@ -155,15 +160,19 @@ const postPublishRoute = async function (req, res) {
   }
 }
 
-const postUnpublishRoute = async function (req, res) {
-  const postId = req.body.post.id ? req.body.post.id : req.body.post.current.id
+const postDeleteRoute = async function (req, res) {
+  if (req.query.apiKey != req.app.get('apiKey')) { // eslint-disable-line eqeqeq
+    res.status(401).send()
+    return
+  }
+
   const ghost = req.app.get('ghost')
   const db = req.app.get('db')
 
   try {
-    const post = await getPostAsync(ghost, postId)
     const followers = await getFollowersAsync(db)
     const language = await getLanguageAsync(ghost)
+    const post = req.body.post.id ? req.body.post : req.body.post.current
     const postObject = createPostPayload(post, language)
 
     if (followers.length > 0) {
@@ -184,7 +193,7 @@ module.exports = {
   routers: {
     get: postGetRoute,
     publish: postPublishRoute,
-    unpublish: postUnpublishRoute
+    delete: postDeleteRoute
   },
   createPostPayload,
   getPostsAsync,

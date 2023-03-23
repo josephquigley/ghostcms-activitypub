@@ -3,6 +3,7 @@ const logger = require('morgan')
 const GhostContentAPI = require('@tryghost/content-api')
 const utils = require('./utils')
 const bodyParser = require('body-parser')
+const fs = require('fs')
 
 /** Define API paths **/
 global.actorPath = `${process.env.API_ROOT_PATH}/actors`
@@ -47,6 +48,13 @@ const ghost = new GhostContentAPI({
 app.set('ghost', ghost)
 app.set('db', utils.db())
 
+try {
+  app.set('apiKey', fs.readFileSync(utils.apiKeyPath))
+} catch (err) {
+  console.error('ERROR: Could not load API key\n', err)
+  process.exit(1)
+}
+
 app.use((req, res, next) => {
   res.append('Access-Control-Allow-Origin', ['*'])
   res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
@@ -59,7 +67,7 @@ app.get(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}.json`, profileHandl
 app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
 app.use(global.staticImagesPath, express.static('img'))
 app.use(`${process.env.API_ROOT_PATH}/publish`, express.Router().post('/', Post.routers.publish))
-app.use(`${process.env.API_ROOT_PATH}/unpublish`, express.Router().post('/', Post.routers.unpublish))
+app.use(`${process.env.API_ROOT_PATH}/delete`, express.Router().post('/', Post.routers.delete))
 app.use(global.tagsPath, Tags.router)
 
 app.get('/', (req, res) => {

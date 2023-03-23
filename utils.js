@@ -128,6 +128,8 @@ module.exports = {
   removeHttpURI,
   certs,
   db: openDatabase,
+  dataDir,
+  apiKeyPath: `${dataDir}/apiKey.txt`,
 
   // Cache the keys so that the disk doesn't have to be read on each ActivityPub request
   pubKey: () => {
