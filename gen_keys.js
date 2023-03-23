@@ -2,6 +2,7 @@ const exec = require("child_process").exec
 const fs = require("fs")
 const { dataDir } = require("./utils")
 const utils = require('./utils')
+const crypto = require('crypto')
 const certs = utils.certs
 
 function run(shellCommand) {
