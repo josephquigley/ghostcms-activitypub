@@ -47,13 +47,6 @@ const ghost = new GhostContentAPI({
 app.set('ghost', ghost)
 app.set('db', utils.db())
 
-function setAccountCreationDate (dateStr) {
-  app.set('account_created_at', dateStr)
-}
-
-// Default account creation time if Ghost takes too long to respond before the first account query
-setAccountCreationDate(new Date().toISOString())
-
 app.use((req, res, next) => {
   res.append('Access-Control-Allow-Origin', ['*'])
   res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
@@ -79,25 +72,6 @@ app.get('*', (req, res) => {
 app.post('*', (req, res) => {
   res.status(404)
   res.send('Resource not found')
-})
-
-// Fetch the last 5000 posts and find the oldest
-ghost.posts.browse({ limit: 5000 })
-  .then((posts) => {
-    const oldestPost = posts[posts.length - 1]
-    setAccountCreationDate(oldestPost.published_at)
-  })
-  .catch((err) => {
-    // Ignore error
-    console.warn('Could not fetch oldest Ghost post')
-    console.warn(err)
-  })
-
-ghost.settings.browse().then((settings) => {
-  app.set('language', settings.lang)
-}).catch((err) => {
-  console.warn('Could not fetch Ghost language')
-  console.warn(err)
 })
 
 module.exports = app

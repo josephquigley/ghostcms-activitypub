@@ -21,6 +21,11 @@ function createTagCollectionPayload (ghostTag, ghostPosts) {
   }
 }
 
+function createTagHtml (ghostTag, name) {
+  const tagObject = createTagPayload(ghostTag, name)
+  return `<a href="${tagObject.href}" class="mention hashtag" rel="tag">#<span>${tagObject.name.replace('#', '')}</span></a>`
+}
+
 function createTagPayload (ghostTag, name) {
   let slug = ''
   if (typeof ghostTag === 'string') {
@@ -66,5 +71,6 @@ async function tagCollectionRoute (req, res) {
 module.exports = {
   router: express.Router().get('/:tagName', tagCollectionRoute),
   createTagPayload,
-  createTagCollectionPayload
+  createTagCollectionPayload,
+  createTagHtml
 }

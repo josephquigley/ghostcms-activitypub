@@ -87,6 +87,21 @@ const profile = async function (req, res, next) {
 
   profilePayload.name = siteData.title
   profilePayload.summary = `${siteData.description}\n<br/><a href="${global.profileURL}">${global.profileURL}</a>` // TODO add h-card data?
+
+  if (!req.app.get('account_created_at')) {
+    // Fetch the oldest post to determine the ActivityPub actor creation/published date
+    try {
+      const oldestPosts = await ghost.posts.browse({ limit: 1, order: 'published_at asc' })
+      if (oldestPosts.length > 0) {
+        req.app.set('account_created_at', oldestPosts[0].published_at)
+      } else {
+        throw new Error('No posts found.')
+      }
+    } catch (err) {
+      req.app.set('account_created_at', new Date().toISOString())
+    }
+  }
+
   profilePayload.published = req.app.get('account_created_at')
 
   profilePayload.icon = imagePayload()
