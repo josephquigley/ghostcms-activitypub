@@ -135,7 +135,7 @@ const postPublishRoute = async function (req, res) {
     res.status(401).send()
     return
   }
-  
+
   const postId = req.body.post.id ? req.body.post.id : req.body.post.current.id
   const ghost = req.app.get('ghost')
   const db = req.app.get('db')
@@ -146,12 +146,10 @@ const postPublishRoute = async function (req, res) {
     const language = await getLanguageAsync(ghost)
     const postObject = createPostPayload(post, language)
 
-    if (followers.length > 0) {
-      followers.forEach(async (follower) => {
-      // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
-        utils.signAndSend(createNotification('Destroy', postObject), { inbox: follower.follower_uri + '/inbox' })
-      })
-    }
+    followers.forEach(async (follower) => {
+    // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
+      utils.signAndSend(createNotification('Create', postObject), { inbox: follower.follower_uri + '/inbox' })
+    })
 
     res.status(200).send()
   } catch (err) {
@@ -175,12 +173,10 @@ const postDeleteRoute = async function (req, res) {
     const post = req.body.post.id ? req.body.post : req.body.post.current
     const postObject = createPostPayload(post, language)
 
-    if (followers.length > 0) {
-      followers.forEach(async (follower) => {
-      // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
-        utils.signAndSend(createNotification('Destroy', postObject), { inbox: follower.follower_uri + '/inbox' })
-      })
-    }
+    followers.forEach(async (follower) => {
+    // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
+      utils.signAndSend(createNotification('Destroy', postObject), { inbox: follower.follower_uri + '/inbox' })
+    })
 
     res.status(200).send()
   } catch (err) {
