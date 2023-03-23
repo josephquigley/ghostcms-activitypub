@@ -59,6 +59,7 @@ app.get(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}.json`, profileHandl
 app.use(`${global.actorPath}/${process.env.ACCOUNT_USERNAME}`, actorRouter)
 app.use(global.staticImagesPath, express.static('img'))
 app.use(`${process.env.API_ROOT_PATH}/publish`, express.Router().post('/', Post.routers.publish))
+app.use(`${process.env.API_ROOT_PATH}/unpublish`, express.Router().post('/', Post.routers.unpublish))
 app.use(global.tagsPath, Tags.router)
 
 app.get('/', (req, res) => {

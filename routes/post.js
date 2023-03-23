@@ -48,7 +48,7 @@ function createPostPayload (ghostPost, language) {
 
   postPayload.content = ghostPost.html
 
-  return postPayload
+  return JSON.stringify(postPayload)
 }
 
 let language = null
@@ -59,7 +59,7 @@ async function getLanguageAsync (ghostAPI) {
   return language
 }
 
-const POST_QUERY_LIMIT = 2
+const POST_QUERY_LIMIT = 10
 async function getPostsAsync (ghostAPI, filters) {
   filters = filters || { include: 'tags' }
 
@@ -86,6 +86,28 @@ async function getPostsAsync (ghostAPI, filters) {
   }
 }
 
+async function getPostAsync (ghostAPI, postId) {
+  return await ghostAPI.posts.read({ id: postId, include: 'tags' }, { formats: ['html'] })
+}
+
+async function getFollowersAsync (db) {
+  return await db.all('select follower_uri from followers')
+}
+
+function createNotification (type, object) {
+  return JSON.stringify({
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    id: `${global.accountURL}/${type.replace(/[\s]+/g, '').toLowerCase()}-${object.id}`,
+    type,
+    actor: global.accountURL,
+    object,
+    to: 'https://www.w3.org/ns/activitystreams#Public',
+    cc: [
+      `${global.followersURL}`
+    ]
+  })
+}
+
 const postGetRoute = async function (req, res) {
   const postId = req.params.postId
   if (!postId) {
@@ -95,7 +117,7 @@ const postGetRoute = async function (req, res) {
   const ghost = req.app.get('ghost')
 
   try {
-    const post = await ghost.posts.read({ id: postId, include: 'tags' }, { formats: ['html'] })
+    const post = await getPostAsync(ghost, postId)
 
     res.json(createPostPayload(post, getLanguageAsync(ghost)))
   } catch (err) {
@@ -114,25 +136,44 @@ const postPublishRoute = async function (req, res) {
   const db = req.app.get('db')
 
   try {
-    const post = await ghost.posts.read({ id: postId, include: 'tags' }, { formats: ['html'] })
-    const followers = await db.all('select follower_uri from followers')
+    const post = await getPostAsync(ghost, postId)
+    const followers = await getFollowersAsync(db)
+    const language = await getLanguageAsync(ghost)
+    const postObject = createPostPayload(post, language)
 
-    followers.forEach(async (follower) => {
-      const postObject = createPostPayload(post, getLanguageAsync(ghost))
-      const postPayload = {
-        '@context': 'https://www.w3.org/ns/activitystreams',
-        id: `${global.accountURL}/create-${postObject.id}`,
-        type: 'Create',
-        actor: global.accountURL,
-        object: postObject,
-        to: 'https://www.w3.org/ns/activitystreams#Public'
-      }
-
+    if (followers.length > 0) {
+      followers.forEach(async (follower) => {
       // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
-      utils.signAndSend(postPayload, { inbox: follower.follower_uri + '/inbox' })
-    })
+        utils.signAndSend(createNotification('Destroy', postObject), { inbox: follower.follower_uri + '/inbox' })
+      })
+    }
 
-    res.status(200)
+    res.status(200).send()
+  } catch (err) {
+    // TODO send 500 error if ghost post call fails
+    res.status(404).send(err.message)
+  }
+}
+
+const postUnpublishRoute = async function (req, res) {
+  const postId = req.body.post.id ? req.body.post.id : req.body.post.current.id
+  const ghost = req.app.get('ghost')
+  const db = req.app.get('db')
+
+  try {
+    const post = await getPostAsync(ghost, postId)
+    const followers = await getFollowersAsync(db)
+    const language = await getLanguageAsync(ghost)
+    const postObject = createPostPayload(post, language)
+
+    if (followers.length > 0) {
+      followers.forEach(async (follower) => {
+      // TODO: Fetch actor first, then get its inbox rather than infer it to be /inbox
+        utils.signAndSend(createNotification('Destroy', postObject), { inbox: follower.follower_uri + '/inbox' })
+      })
+    }
+
+    res.status(200).send()
   } catch (err) {
     // TODO send 500 error if ghost post call fails
     res.status(404).send(err.message)
@@ -142,7 +183,8 @@ const postPublishRoute = async function (req, res) {
 module.exports = {
   routers: {
     get: postGetRoute,
-    publish: postPublishRoute
+    publish: postPublishRoute,
+    unpublish: postUnpublishRoute
   },
   createPostPayload,
   getPostsAsync,
