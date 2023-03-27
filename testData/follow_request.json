@@ -1,0 +1,8 @@
+{
+    "@context": "https://www.w3.org/ns/activitystreams",
+    "id": "https://example.com/952feac3-591a-4a00-a2c0-ded179f1f88e",
+    "type": "Follow",
+    "actor": "https://example.com/users/quigs",
+    "object": "https://74bd-24-247-114-185.ngrok.io/actors/test_quigs_blog"
+  }
+  

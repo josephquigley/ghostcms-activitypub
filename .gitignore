@@ -2,6 +2,9 @@
 data
 data/*
 
+dataBackup
+dataBackup/*
+
 # Logs
 logs
 *.log

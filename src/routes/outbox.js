@@ -1,13 +1,15 @@
-const Post = require('./post')
+import { getPostsAsync } from './post.js'
+import { Ghost } from '../ghost.js'
+import { url } from '../constants.js'
 
 function outboxPayload () {
   return {
     '@context': 'https://www.w3.org/ns/activitystreams',
-    id: global.outboxURL,
+    id: url.outbox,
     type: 'OrderedCollection',
     totalItems: 0,
-    first: `${global.outboxURL}/first`,
-    last: `${global.outboxURL}/last`
+    first: `${url.outbox}/first`,
+    last: `${url.outbox}/last`
   }
 }
 
@@ -20,20 +22,18 @@ function outboxCollectionPayload (id) {
     next: null,
     prev: null,
 
-    partOf: global.outboxURL,
+    partOf: url.outbox,
     orderedItems: []
   }
 }
 
-const outbox = async function (req, res, next) {
-  const ghost = req.app.get('ghost')
-
+export const outbox = async function (req, res, next) {
   if (req.query && req.query.page) {
     return outboxPage(req, res, next)
   }
 
   try {
-    const posts = await Post.getPostsAsync(ghost)
+    const posts = await getPostsAsync(Ghost)
     const payload = outboxPayload()
     payload.totalItems = posts.pagination.total
     res.json(payload)
@@ -45,30 +45,21 @@ const outbox = async function (req, res, next) {
 }
 
 const outboxPage = async function (req, res, next) {
-  const ghost = req.app.get('ghost')
-
   try {
     const page = parseInt(req.query.page)
-    const posts = await Post.getPostsAsync(ghost, { page })
+    const posts = await getPostsAsync({ page })
     const payload = outboxCollectionPayload()
     payload.orderedItems = posts.posts
 
     // Pagination relies on the Ghost api matching the same next/prev null/int format as ActivityPub
     // This could break if Ghost changes the behavior
-    payload.next = `${global.outboxURL}?page=${Math.min(posts.pagination.next, posts.pagination.pages)}`
-    payload.prev = `${global.outboxURL}?page=${Math.min(posts.pagination.prev, posts.pagination.pages)}`
+    payload.next = `${url.outbox}?page=${Math.min(posts.pagination.next, posts.pagination.pages)}`
+    payload.prev = `${url.outbox}?page=${Math.min(posts.pagination.prev, posts.pagination.pages)}`
 
     res.json(payload)
     return
   } catch (err) {
     console.error('Could not fetch Ghost posts:\n' + err)
     res.status(500).send('Internal error while fetching posts')
-  }
-}
-
-module.exports = {
-  routers: {
-    outbox,
-    outboxPage
   }
 }

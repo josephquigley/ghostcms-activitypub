@@ -1,5 +1,7 @@
 
-const express = require('express')
+import express from 'express'
+import { Ghost } from '../ghost.js'
+import { url } from '../constants.js'
 
 function sanitizeHashtagName (name) {
   name = name.replace(/\s+/g, '').replace(/[_]+/g, '')
@@ -11,22 +13,22 @@ function sanitizeHashtagName (name) {
   return sanitizedName
 }
 
-function createTagCollectionPayload (ghostTag, ghostPosts) {
+export function createTagCollectionPayload (ghostTag, ghostPosts) {
   return {
     '@context': 'https://www.w3.org/ns/activitystreams',
-    id: `${global.tagsURL}/${ghostTag.slug}`,
+    id: `${url.tags}/${ghostTag.slug}`,
     type: 'OrderedCollection',
     totalItems: ghostTag.count.posts,
     orderedItems: [] // TODO parse ghostPosts array into post payload
   }
 }
 
-function createTagHtml (ghostTag, name) {
+export function createTagHtml (ghostTag, name) {
   const tagObject = createTagPayload(ghostTag, name)
   return `<a href="${tagObject.href}" class="mention hashtag" rel="tag">#<span>${tagObject.name.replace('#', '')}</span></a>`
 }
 
-function createTagPayload (ghostTag, name) {
+export function createTagPayload (ghostTag, name) {
   let slug = ''
   if (typeof ghostTag === 'string') {
     slug = ghostTag
@@ -36,17 +38,16 @@ function createTagPayload (ghostTag, name) {
   }
   return {
     type: 'Hashtag',
-    href: `${global.tagsURL}/${slug}`,
+    href: `${url.tags}/${slug}`,
     name: `#${sanitizeHashtagName(name)}`
   }
 }
 
-async function tagCollectionRoute (req, res) {
-  const ghost = req.app.get('ghost')
+export async function tagCollectionRoute (req, res) {
   const slug = req.path.replace(/\/*/, '')
 
   try {
-    const tagData = await ghost.tags.read({ slug }, { include: 'count.posts', filter: 'visibility:public' })
+    const tagData = await Ghost.tags.read({ slug }, { include: 'count.posts', filter: 'visibility:public' })
 
     const shouldForwardHTMLToGhost = process.env.NODE_ENV === 'production' || req.query.forward
 
@@ -55,7 +56,7 @@ async function tagCollectionRoute (req, res) {
       return
     }
 
-    const postsForTag = await ghost.posts.browse({ limit: 10, filter: `tag:${slug}`, formats: ['html'] })
+    const postsForTag = await Ghost.posts.browse({ limit: 10, filter: `tag:${slug}`, formats: ['html'] })
 
     res.json(createTagCollectionPayload(tagData, postsForTag))
   } catch (err) {
@@ -67,9 +68,4 @@ async function tagCollectionRoute (req, res) {
   }
 }
 
-module.exports = {
-  router: express.Router().get('/:tagName', tagCollectionRoute),
-  createTagPayload,
-  createTagCollectionPayload,
-  createTagHtml
-}
+export const router = express.Router().get('/:tagName', tagCollectionRoute)

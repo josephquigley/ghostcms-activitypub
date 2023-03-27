@@ -1,0 +1,16 @@
+{
+    "@context": "https://www.w3.org/ns/activitystreams",
+    "id": "https://hachyderm.io/users/jun886#delete",
+    "type": "Delete",
+    "actor": "https://hachyderm.io/users/jun886",
+    "to": [
+      "https://www.w3.org/ns/activitystreams#Public"
+    ],
+    "object": "https://hachyderm.io/users/jun886",
+    "signature": {
+      "type": "RsaSignature2017",
+      "creator": "https://hachyderm.io/users/jun886#main-key",
+      "created": "2023-03-24T22:38:34Z",
+      "signatureValue": "ObpZGGkJHErqWAlE09Kd3uTwpQvi6FteyMNNXFkArNyXGgr0KIMz08o2rOwZNhk8H+3vGEU7JGSC8R7xsohQJgl+>"
+    }
+  }

@@ -1,5 +1,6 @@
-const express = require('express')
-const router = express.Router()
+import express from 'express'
+import { url } from '../constants.js'
+const wellKnownRouter = express.Router()
 
 const subject = 'acct:' + process.env.ACCOUNT_USERNAME + '@' + process.env.SERVER_DOMAIN
 
@@ -7,31 +8,31 @@ const webfingerPayload = {
   subject,
   aliases: [
     subject,
-    global.profileURL,
-    global.accountURL
+    url.profile,
+    url.account
   ],
   links: [
     {
       rel: 'http://webfinger.net/rel/profile-page',
       type: 'text/html',
-      href: global.profileURL
+      href: url.profile
     },
     {
       rel: 'self',
       type: 'application/activity+json',
-      href: global.accountURL
+      href: url.account
     }
 
     /*
     {
       rel: 'http://ostatus.org/schema/1.0/subscribe',
-      template: `${global.accountURL}/ostatus_subscribe?uri={uri}`
+      template: `${url.account}/ostatus_subscribe?uri={uri}`
     } */
   ]
 }
 
 /* Static webfinger for the Ghost activitypub account. */
-router.get('/webfinger', function (req, res, next) {
+wellKnownRouter.get('/webfinger', function (req, res, next) {
   const resource = req.query.resource
 
   res.set('Access-Control-Allow-Methods', 'GET')
@@ -48,11 +49,11 @@ router.get('/webfinger', function (req, res, next) {
     res.json(webfingerPayload)
   } else {
     res.status(404)
-    res.send(global.accountNotFoundMsg)
+    res.send('Account not found')
   }
 })
 
-router.get('/host-meta', function (req, res, next) {
+wellKnownRouter.get('/host-meta', function (req, res, next) {
   res.set('Access-Control-Allow-Methods', 'GET')
   res.set('Content-Type', 'application/xml')
   res.send(`
@@ -63,4 +64,4 @@ router.get('/host-meta', function (req, res, next) {
   `)
 })
 
-module.exports = router
+export default wellKnownRouter
