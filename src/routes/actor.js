@@ -45,7 +45,6 @@ async function followersRoute (req, res) {
   } else {
     const followers = await db.getFollowers({ page, limit: 15 })
     const payload = followerCollectionPage(page, followers.meta.pagination.next, followers.meta.pagination.prev)
-    console.log(followers.meta.pagination)
 
     payload.totalItems = followers.meta.pagination.total
     if (process.env.SHOW_FOLLOWERS === 'true') {

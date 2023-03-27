@@ -18,8 +18,6 @@ function isDeleteAccount (message) {
 export const postInbox = async function (req, res) {
   const payload = req.body
 
-  console.log(payload)
-
   try {
     if (isUnfollowAccount(payload)) {
       ActivityPub.enqueue(async () => {
