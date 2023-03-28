@@ -190,6 +190,7 @@ export class Database {
    * @returns { Promise<[PostPublishState]> } The Ghost post's publishing states
    */
   async getPostState (ghostId, state) {
+    ghostId = ghostId.replace(/_[\d]+$/g, '')
     let states = []
     if (state) {
       states = await this.#posts.where({ ghostId, state }).orderBy('created_at', 'desc')

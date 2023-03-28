@@ -99,8 +99,14 @@ export const postGetRoute = async function (req, res) {
 
   try {
     const post = await getPostAsync(postId)
-    const postState = await db.getPostState(post.id, 'published')[0]
-    res.json(createPostPayload(post, language, postState))
+    const postStates = await db.getPostState(postId, 'published')
+
+    if (postStates.length === 0) {
+      res.status(404).send()
+      return
+    }
+
+    res.json(createPostPayload(post, language, postStates[0]))
   } catch (err) {
     if (err.response) {
       res.status(err.response.status).send(err.response.statusText)
