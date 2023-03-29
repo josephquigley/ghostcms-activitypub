@@ -4,6 +4,10 @@ This is a simple ExpressJS server that integrates with GhostCMS webhooks and imp
 ## Mandatory Warning
 This project is currently experimental and could un-recoverably break something between versions. It should be used with caution, as only happy-path, Mastodon-compatible interaction has been tested. Although it should be safe to run after configuration, do not experiment with this code or config on your primary domain as you might find yourself ban-listed by a Mastodon instance for spam, should anything go wrong. Consider hosting locally and proxying via [ngrok](https://ngrok.com) to create a throw-away domain.
 
+## Features
+* GhostCMS Webhooks for post creation and unpublish/delete activities.
+* A single ActivityPub actor for your site (@username@yoursite.tld)
+
 ## Issues and Feature Requests
 Feature requests and bugs can be tracked and reported at this project's [Codeberg issue](https://codeberg.org/quigs/ghostcms-activitypub/issues) tracker.
 
@@ -20,6 +24,8 @@ Be sure to set the appropriate configuration settings by copying `.env.template`
 $ npm run dev # Debug
 $ npm run start # Production
 ```
+
+On startup the service will create an API key for Ghost webhooks, available at `data/apiKey.txt`. To integrate with Ghost, create a `Post published` and a `Post unpublished` webhook that point to `/publish?apiKey=YOUR_KEY_HERE` and `/delete?apiKey=YOUR_KEY_HERE` respectively. If you changed the API path root from the default (none) then your webhooks will be located at `API_ROOT_PATH/publish` and `API_ROOT_PATH/delete`. For example, if your API root path is set to `/activitypub` and the activitypub is running on the same domain then Ghost will need to publish to `https://yourghostdomain/activitypub/publish?apiKey=YOUR_KEY_HERE`.
 
 ### Running As A Service
 A systemd service file is provided as well. You can follow the configuration instructions in the file and then copy that to `/etc/systemd/system/` and enable and run the service:
@@ -48,10 +54,6 @@ location /activitypub/ { # The trailing slash is required to proxy all sub-paths
     proxy_pass http://127.0.0.1:3000; # The trailing / and the headers ensure that /activitypub/foo gets rewritten to just /foo
 }
 ```
-
-## Features
-* GhostCMS Webhook
-* A single ActivityPub actor for your site (@username@yoursite.tld)
 
 ## License
 MIT
