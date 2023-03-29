@@ -78,7 +78,13 @@ export async function getPostsAsync (filters, language) {
 
   return {
     posts: posts.map(async (post) => {
-      const postState = await db.getPostState(post.id, 'published')[0]
+      const postStates = await db.getPostState(post.id, 'published')
+      let postState = postStates[0]
+
+      // Older posts may not have been published to the Fediverse, so a new post state must be created for them
+      if (postStates.length === 0) {
+        postState = await db.createPostState(post)
+      }
       return createPostPayload(post, language, postState)
     }),
     pagination: posts.meta.pagination
