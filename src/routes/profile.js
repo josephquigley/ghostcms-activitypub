@@ -86,6 +86,7 @@ export const profileRoute = async function (req, res, next) {
   const siteData = await Ghost.settings.browse()
 
   const profile = profilePayload()
+  profile.type = app.get('profileType')
 
   profile.name = process.env.ACCOUNT_NAME || siteData.title
   profile.summary = `${siteData.description}\n<br/><a href="${url.profile}">${url.profile}</a>` // TODO add h-card data?

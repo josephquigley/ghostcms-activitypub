@@ -22,7 +22,7 @@ if (!fs.existsSync('.env')) {
 }
 const debug = Debug('ghostcms-activitypub:server')
 
-async function createServer (lang) {
+async function createServer (data) {
   /**
    * Normalize a port into a number, string, or false.
    */
@@ -88,7 +88,8 @@ async function createServer (lang) {
    */
   const port = normalizePort(process.env.PORT || '3000')
   app.set('port', port)
-  app.set('lang', lang)
+  app.set('lang', language)
+  app.set('authorType', authorCount > 1 ? 'Group' : 'Service')
 
   /**
    * Create HTTP server.
@@ -107,7 +108,6 @@ async function createServer (lang) {
 
 Ghost.settings.browse().then(async settings => {
   await new Database().initialize()
-  return settings.lang
-}).then(lang => {
-  createServer(lang)
-})
+  const authors = await Ghost.authors.browse({ limit: 2 })
+  return {language: settings.lang, authorCount: authors.meta.pagination.total}
+}).then(createServer)
