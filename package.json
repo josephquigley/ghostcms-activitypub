@@ -1,6 +1,6 @@
 {
   "name": "ghostcms-activitypub",
-  "version": "0.1",
+  "version": "0.3.1",
   "private": true,
   "license": {
     "type": "MIT",
@@ -11,7 +11,8 @@
     "start": "NODE_ENV=production node ./bin/www.js",
     "manual_post": "./bin/manual_post.js",
     "lint": "npx eslint --fix app.js bin/ src/ migrations/",
-    "dev": "npm run lint && NODE_ENV=development DEBUG=ghostcms-activitypub:* node ./bin/www.js"
+    "dev": "npm run lint && NODE_ENV=development DEBUG=ghostcms-activitypub:* node ./bin/www.js",
+    "newRelease": "node ./bin/new_release.js"
   },
   "dependencies": {
     "@tryghost/content-api": "^1.11.7",
