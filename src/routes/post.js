@@ -19,7 +19,8 @@ export function createPostPayload (ghostPost, language, postState) {
     '@context': [
       'https://www.w3.org/ns/activitystreams',
       {
-        Hashtag: 'as:Hashtag'
+        Hashtag: 'as:Hashtag',
+        toot: 'http://joinmastodon.org/ns#'
       }
     ],
     id,
@@ -30,9 +31,10 @@ export function createPostPayload (ghostPost, language, postState) {
     language,
     uri: id,
     url: ghostPost.url ?? null,
+    atomUri: id,
     content: null,
     type: 'Article',
-    to: 'https://www.w3.org/ns/activitystreams#Public',
+    to: ['https://www.w3.org/ns/activitystreams#Public'],
     cc: [
       `${url.followers}`
     ],
@@ -54,7 +56,6 @@ export function createPostPayload (ghostPost, language, postState) {
   }
 
   postPayload.content = ghostPost.html
-
   return postPayload
 }
 
@@ -75,20 +76,23 @@ export async function getPostsAsync (filters, language) {
   }
 
   const posts = await Ghost.posts.browse(filters)
+  const activityPubPosts = posts.map(async (post) => {
+    const postStates = await db.getPostState(post.id, 'published')
+    let postState = postStates[0]
 
-  return {
-    posts: posts.map(async (post) => {
-      const postStates = await db.getPostState(post.id, 'published')
-      let postState = postStates[0]
+    // Older posts may not have been published to the Fediverse, so a new post state must be created for them
+    if (postStates.length === 0) {
+      postState = await db.createPostState(post)
+    }
+    return createPostPayload(post, language, postState)
+  })
 
-      // Older posts may not have been published to the Fediverse, so a new post state must be created for them
-      if (postStates.length === 0) {
-        postState = await db.createPostState(post)
-      }
-      return createPostPayload(post, language, postState)
-    }),
-    pagination: posts.meta.pagination
-  }
+  return Promise.all(activityPubPosts).then(activityPubPosts => {
+    return {
+      posts: activityPubPosts,
+      pagination: posts.meta.pagination
+    }
+  })
 }
 
 export async function getPostAsync (postId) {

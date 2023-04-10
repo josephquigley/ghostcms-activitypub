@@ -2,15 +2,14 @@ import { removeHttpURI } from '../utils.js'
 import { Ghost } from '../ghost.js'
 import { url, key } from '../constants.js'
 
-const mastodonAttachments = {
-  attachment: [
+const mastodonAttachments =
+  [
     {
       type: 'PropertyValue',
       name: 'Website',
       value: `<a href="${url.profile}" target="_blank" rel="nofollow noopener noreferrer me"><span class="invisible">https://</span><span class="">${removeHttpURI(url.profile)}</span><span class="invisible"></span></a>`
     }
   ]
-}
 
 export function profilePayload () {
   return {
@@ -22,18 +21,27 @@ export function profilePayload () {
         value: 'schema:value',
         toot: 'http://joinmastodon.org/ns#',
         discoverable: 'toot:discoverable',
-        Hashtag: 'as:Hashtag'
+        Hashtag: 'as:Hashtag',
+        featured: {
+          '@id': 'toot:featured',
+          '@type': '@id'
+        },
+        alsoKnownAs: {
+          '@id': 'as:alsoKnownAs',
+          '@type': '@id'
+        },
+        publicKeyBase64: 'toot:publicKeyBase64'
       }
     ],
     id: url.account,
     type: 'Service', // Bots are 'Service' types
     following: url.account + '/following',
     followers: url.account + '/followers',
+    featured: url.featured,
     inbox: url.inbox,
 
     // TODO: Debug why Mastodon doesn't show historical posts?
     outbox: url.outbox,
-    // "featured": "https://meta.masto.host/users/GamingNews/collections/featured",
     // "featuredTags": "https://meta.masto.host/users/GamingNews/collections/tags",
     preferredUsername: process.env.ACCOUNT_USERNAME,
     name: process.env.ACCOUNT_NAME,
