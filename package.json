@@ -1,6 +1,6 @@
 {
   "name": "ghostcms-activitypub",
-  "version": "0.3.1",
+  "version": "0.4",
   "private": true,
   "license": {
     "type": "MIT",
