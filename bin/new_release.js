@@ -12,13 +12,12 @@ if (!version) {
 version = version.replace(/^v/, '')
 
 try {
-  const packageJson = fs.readFileSync(packageJsonPath)
+  var packageJson = JSON.parse(fs.readFileSync(packageJsonPath))
   packageJson.version = version
 
-  fs.writeFileSync(packageJsonPath, packageJson)
-
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
   execSync(`git commit ${packageJsonPath} -m 'Setting package version to ${version}' && git tag v${version} && git push --tags`)
 } catch (err) {
-  console.error(err)
+  console.error(err.message)
   process.exit(1)
 }
