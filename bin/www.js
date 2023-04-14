@@ -110,4 +110,6 @@ Ghost.settings.browse().then(async settings => {
   return settings.lang
 }).then(lang => {
   createServer(lang)
+}).catch(err => {
+  console.error(err.message)
 })

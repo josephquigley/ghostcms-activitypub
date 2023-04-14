@@ -82,6 +82,8 @@ function contentTypeFromUrl (url) {
   }
 }
 
+let siteData = null
+
 export const profileRoute = async function (req, res, next) {
   const shouldForwardHTMLToGhost = process.env.NODE_ENV === 'production' || req.query.forward
 
@@ -91,7 +93,9 @@ export const profileRoute = async function (req, res, next) {
     return
   }
 
-  const siteData = await Ghost.settings.browse()
+  if (siteData == null) {
+    siteData = await Ghost.settings.browse()
+  }
 
   const profile = profilePayload()
 

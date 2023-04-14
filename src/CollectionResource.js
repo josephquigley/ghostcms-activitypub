@@ -1,6 +1,6 @@
-import { getPostsAsync } from './post.js'
-import { url } from '../constants.js'
-import { OrderedCollection, OrderedCollectionPage } from '../OrderedCollection.js'
+import { getPostsAsync } from './routes/post.js'
+import { url } from './constants.js'
+import { OrderedCollection, OrderedCollectionPage } from './OrderedCollection.js'
 
 function structuredClone (obj) {
   const stringified = JSON.stringify(obj)

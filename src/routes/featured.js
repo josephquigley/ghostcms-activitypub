@@ -1,5 +1,5 @@
 import { url } from '../constants.js'
-import { CollectionResource } from './CollectionResource.js'
+import { CollectionResource } from '../CollectionResource.js'
 
 const collectionResource = new CollectionResource({ id: url.featured, query: { filter: 'featured:true' } })
 

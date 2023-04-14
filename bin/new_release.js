@@ -12,7 +12,7 @@ if (!version) {
 version = version.replace(/^v/, '')
 
 try {
-  var packageJson = JSON.parse(fs.readFileSync(packageJsonPath))
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath))
   packageJson.version = version
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
