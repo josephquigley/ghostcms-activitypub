@@ -6,6 +6,7 @@ import { postInbox } from './inbox.js'
 import { url } from '../constants.js'
 import { Database } from '../db.js'
 import { featuredRoute } from './featured.js'
+import { likedRoute } from './liked.js'
 
 const db = new Database()
 
@@ -72,5 +73,6 @@ export const actorRouter = express.Router()
   .get(url.path.followers, followersRoute)
   .get(url.path.following, followingRoute)
   .get(url.path.featured, featuredRoute)
+  .get(url.path.liked, likedRoute)
   .get('/:postId', postGetRoute)
   .post(url.path.inbox, postInbox)

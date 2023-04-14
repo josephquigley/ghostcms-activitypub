@@ -21,6 +21,10 @@ export class OrderedCollection {
       this.first = params.firstUri ?? null
       this.last = params.lastUri ?? null
     }
+
+    if (this.totalItems === 0) {
+      this.orderedItems = []
+    }
   }
 
   newPage (params) {

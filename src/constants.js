@@ -18,7 +18,8 @@ const urlPaths = {
   followers: '/followers',
   inbox: '/inbox',
   outbox: '/outbox',
-  featured: '/featured'
+  featured: '/featured',
+  liked: '/liked'
 }
 
 export const filePath = {
@@ -41,6 +42,8 @@ export const url = {
   outbox: `${accountURL}${urlPaths.outbox}`,
   featured: `${accountURL}${urlPaths.featured}`,
   followers: `${accountURL}${urlPaths.followers}`,
+  following: `${accountURL}${urlPaths.following}`,
+  liked: `${accountURL}${urlPaths.liked}`,
   tags: `https://${process.env.SERVER_DOMAIN}${urlPaths.tags}`,
   publish: `https://${process.env.SERVER_DOMAIN}${urlPaths.publish}`,
   delete: `https://${process.env.SERVER_DOMAIN}${urlPaths.delete}`

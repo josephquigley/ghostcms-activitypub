@@ -35,10 +35,11 @@ export function profilePayload () {
     ],
     id: url.account,
     type: 'Service', // Bots are 'Service' types
-    following: url.account + '/following',
-    followers: url.account + '/followers',
+    following: url.following,
+    followers: url.followers,
     featured: url.featured,
     inbox: url.inbox,
+    liked: url.liked,
 
     // TODO: Debug why Mastodon doesn't show historical posts?
     outbox: url.outbox,
