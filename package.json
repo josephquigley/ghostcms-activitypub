@@ -10,9 +10,10 @@
   "scripts": {
     "start": "NODE_ENV=production node ./bin/www.js",
     "manual_post": "./bin/manual_post.js",
-    "lint": "npx eslint --fix app.js bin/ src/ migrations/",
+    "lint": "npx eslint --fix app.js bin/ src/ migrations/ tests/",
     "dev": "npm run lint && NODE_ENV=development DEBUG=ghostcms-activitypub:* node ./bin/www.js",
-    "newRelease": "node ./bin/new_release.js"
+    "newRelease": "node ./bin/new_release.js",
+    "test": "npm run lint && c8 mocha --recursive ./tests"
   },
   "dependencies": {
     "@tryghost/content-api": "^1.11.7",
@@ -26,10 +27,17 @@
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
+    "c8": "^7.13.0",
+    "chai": "^4.3.7",
     "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-chai-expect": "^3.0.0",
+    "eslint-plugin-chai-friendly": "^0.7.2",
     "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-n": "^15.6.1",
-    "eslint-plugin-promise": "^6.1.1"
+    "eslint-plugin-promise": "^6.1.1",
+    "mocha": "^10.2.0",
+    "sinon": "^15.0.3"
   }
 }

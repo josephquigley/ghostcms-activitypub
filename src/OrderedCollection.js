@@ -1,35 +1,59 @@
+const commonContext = [
+  'https://www.w3.org/ns/activitystreams',
+  {
+    toot: 'http://joinmastodon.org/ns#',
+    discoverable: 'toot:discoverable',
+    Hashtag: 'as:Hashtag'
+  }
+]
+
 export class OrderedCollection {
   constructor (params) {
     params ??= {}
-    this['@context'] = [
-      'https://www.w3.org/ns/activitystreams',
-      {
-        toot: 'http://joinmastodon.org/ns#',
-        discoverable: 'toot:discoverable',
-        Hashtag: 'as:Hashtag'
-      }
-    ]
+    this['@context'] = commonContext
     this.id = params.id ?? crypto.randomUUID()
     this.type = 'OrderedCollection'
-    this.totalItems = params.totalItems ?? (Array.isArray(params.items) ? params.items.length : 0)
+    this.totalItems = params.totalItems ?? 0
 
-    if (Array.isArray(params.items)) {
-      this.orderedItems = params.items
-    } else if (Array.isArray(params.orderedItems)) {
+    if (params.orderedItems && Array.isArray(params.orderedItems)) {
       this.orderedItems = params.orderedItems
-    } else {
-      this.first = params.firstUri ?? null
-      this.last = params.lastUri ?? null
     }
 
-    if (this.totalItems === 0) {
+    const emptyParams = Object.keys(params).length === 0
+    const hasTotalItems = params.totalItems !== undefined && params.totalItems !== null
+    const hasFirstUri = params.firstUri !== undefined && params.firstUri !== null
+    const hasLastUri = params.lastUri !== undefined && params.lastUri !== null
+    const hasPagination = hasFirstUri || hasLastUri
+    const hasItems = this.orderedItems && !hasPagination
+
+    if (hasItems) {
+      this.totalItems = this.orderedItems.length
+    } else if (this.totalItems === 0 && !hasPagination) {
       this.orderedItems = []
+    }
+
+    if (!emptyParams && hasPagination) {
+      if (!hasTotalItems) {
+        throw new MissingRequiredParameter('totalItems')
+      }
+
+      if (!hasFirstUri) {
+        throw new MissingRequiredParameter('firstUri')
+      } else if (!hasLastUri) {
+        throw new MissingRequiredParameter('lastUri')
+      }
+
+      if (this.totalItems > 0) {
+        this.first = params.firstUri
+        this.last = params.lastUri
+      }
     }
   }
 
   newPage (params) {
     params ??= {}
     params.partOfUri ??= this.id
+    params.totalItems ??= this.totalItems
     return new OrderedCollectionPage(params)
   }
 }
@@ -37,14 +61,7 @@ export class OrderedCollection {
 export class OrderedCollectionPage {
   constructor (params) {
     params ??= {}
-    this['@context'] = [
-      'https://www.w3.org/ns/activitystreams',
-      {
-        toot: 'http://joinmastodon.org/ns#',
-        discoverable: 'toot:discoverable',
-        Hashtag: 'as:Hashtag'
-      }
-    ]
+    this['@context'] = commonContext
     this.id = params.id ?? crypto.randomUUID()
     this.type = 'OrderedCollectionPage'
 
@@ -64,6 +81,8 @@ export class OrderedCollectionPage {
 
     if (params.totalItems) {
       this.totalItems = params.totalItems
+    } else {
+      throw new MissingRequiredParameter('totalItems')
     }
 
     this.next = params.nextUri ?? null
@@ -71,7 +90,7 @@ export class OrderedCollectionPage {
   }
 }
 
-class MissingRequiredParameter extends Error {
+export class MissingRequiredParameter extends Error {
   constructor (field, type, ...args) {
     const missingMessage = `The parameter, '${field}' is required.`
     const wrongTypeMessage = `The parameter, '${field}' is the wrong type. Expected ${type}.`

@@ -2,14 +2,19 @@
     "env": {
         "browser": true,
         "commonjs": true,
-        "es2021": true
+        "es2021": true,
+        "es6": true,
+        "mocha": true
     },
-    "extends": "standard",
-    "overrides": [
+    "globals": {
+        "expect": "true"
+    },
+    "extends": [
+        "standard", 
+        "plugin:chai-expect/recommended",
+        "plugin:chai-friendly/recommended"
     ],
     "parserOptions": {
         "ecmaVersion": "latest"
-    },
-    "rules": {
     }
 }
