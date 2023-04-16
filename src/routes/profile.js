@@ -89,7 +89,9 @@ export const profileRoute = async function (req, res, next) {
   const shouldForwardHTMLToGhost = process.env.NODE_ENV === 'production' || req.query.forward
 
   // If a web browser is requesting the profile, redirect to the Ghost website
-  if (req.get('Accept').includes('text/html') && !req.path.endsWith('.json') && shouldForwardHTMLToGhost) {
+  const acceptType = req.get('Accept')
+
+  if (acceptType && acceptType.includes('text/html') && !req.path.endsWith('.json') && shouldForwardHTMLToGhost) {
     res.redirect(url.profile)
     return
   }
