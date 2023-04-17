@@ -1,10 +1,10 @@
-import { expect } from 'chai'
-import { OrderedCollection, MissingRequiredParameter, OrderedCollectionPage } from '../src/OrderedCollection.js'
+import { MissingRequiredParameterError } from '../src/errors.js'
+import { OrderedCollection, OrderedCollectionPage } from '../src/OrderedCollection.js'
 
 const uuidRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
 
 /** ======================= OrderedCollection ======================= **/
-describe('An OrderedCollection', function () {
+describe('An OrderedCollection', () => {
   const noId = [new OrderedCollection(), new OrderedCollection({ orderedItems: [0, 1, 2] })]
 
   it('should have a valid ActivityPub @context', () => {
@@ -77,7 +77,7 @@ describe('An OrderedCollection', function () {
       const constructor = () => {
         return new OrderedCollection({ firstUri: 'foo', lastUri: 'bar' })
       }
-      expect(constructor).to.throw(MissingRequiredParameter)
+      expect(constructor).to.throw(MissingRequiredParameterError)
     })
 
     it('should throw an error if it firstUri or secondUri are missing', function () {
@@ -88,8 +88,8 @@ describe('An OrderedCollection', function () {
       const constructor2 = () => {
         return new OrderedCollection({ lastUri: 'bar', totalItems: 2 })
       }
-      expect(constructor1).to.throw(MissingRequiredParameter)
-      expect(constructor2).to.throw(MissingRequiredParameter)
+      expect(constructor1).to.throw(MissingRequiredParameterError)
+      expect(constructor2).to.throw(MissingRequiredParameterError)
     })
 
     it('should not have pagination when totalItems is 0 even if it has a first and last page URI', function () {
@@ -121,11 +121,11 @@ describe('An OrderedCollection', function () {
       expect(newPage.totalItems).to.eql(collection.totalItems)
     })
 
-    it('it should throw a MissingRequiredParameter error when no orderedItems are provided', function () {
+    it('it should throw a MissingRequiredParameterError when no orderedItems are provided', function () {
       const testFn = () => {
         return collection.newPage()
       }
-      expect(testFn).to.throw(MissingRequiredParameter)
+      expect(testFn).to.throw(MissingRequiredParameterError)
     })
   })
 })
@@ -163,20 +163,20 @@ describe('An OrderedCollectionPage', function () {
     const constructor = () => {
       return new OrderedCollectionPage({ partOfUri: 'foo', orderedItems: [1, 2] })
     }
-    expect(constructor).to.throw(MissingRequiredParameter)
+    expect(constructor).to.throw(MissingRequiredParameterError)
   })
 
   it("should throw an error if it doesn't have partOfUri", function () {
     const constructor = () => {
       return new OrderedCollectionPage({ id: 'bar', orderedItems: [1, 2], totalItems: 2 })
     }
-    expect(constructor).to.throw(MissingRequiredParameter)
+    expect(constructor).to.throw(MissingRequiredParameterError)
   })
 
   it("should throw an error if orderedItems isn't an array", function () {
     const constructor = () => {
       return new OrderedCollectionPage({ partOfUri: 'foo', orderedItems: 'str', totalItems: 2 })
     }
-    expect(constructor).to.throw(MissingRequiredParameter)
+    expect(constructor).to.throw(MissingRequiredParameterError)
   })
 })

@@ -3,6 +3,7 @@
     "exclude": [
         "migrations/**.js",
         "bin/**.js",
-        "tests/**.js"
+        "test/**.js",
+        "src/ghost.js"
     ]
 }

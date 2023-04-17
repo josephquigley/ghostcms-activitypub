@@ -1,3 +1,4 @@
+import { MissingRequiredParameterError } from './errors.js'
 const commonContext = [
   'https://www.w3.org/ns/activitystreams',
   {
@@ -34,13 +35,13 @@ export class OrderedCollection {
 
     if (!emptyParams && hasPagination) {
       if (!hasTotalItems) {
-        throw new MissingRequiredParameter('totalItems')
+        throw new MissingRequiredParameterError('totalItems')
       }
 
       if (!hasFirstUri) {
-        throw new MissingRequiredParameter('firstUri')
+        throw new MissingRequiredParameterError('firstUri')
       } else if (!hasLastUri) {
-        throw new MissingRequiredParameter('lastUri')
+        throw new MissingRequiredParameterError('lastUri')
       }
 
       if (this.totalItems > 0) {
@@ -68,34 +69,24 @@ export class OrderedCollectionPage {
     if (params.partOfUri) {
       this.partOf = params.partOfUri
     } else {
-      throw new MissingRequiredParameter('partOfUri')
+      throw new MissingRequiredParameterError('partOfUri')
     }
 
     const items = params.orderedItems
     if (!items) {
-      throw new MissingRequiredParameter('orderedItems')
+      throw new MissingRequiredParameterError('orderedItems')
     } else if (!Array.isArray(items)) {
-      throw new MissingRequiredParameter('orderedItems', 'Array')
+      throw new MissingRequiredParameterError('orderedItems', 'Array')
     }
     this.orderedItems = items
 
     if (params.totalItems) {
       this.totalItems = params.totalItems
     } else {
-      throw new MissingRequiredParameter('totalItems')
+      throw new MissingRequiredParameterError('totalItems')
     }
 
     this.next = params.nextUri ?? null
     this.prev = params.prevUri ?? null
-  }
-}
-
-export class MissingRequiredParameter extends Error {
-  constructor (field, type, ...args) {
-    const missingMessage = `The parameter, '${field}' is required.`
-    const wrongTypeMessage = `The parameter, '${field}' is the wrong type. Expected ${type}.`
-    const message = type ? wrongTypeMessage : missingMessage
-    super(message, ...args)
-    this.message = message
   }
 }

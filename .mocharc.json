@@ -1,0 +1,7 @@
+{
+    "recursive": true,
+    "require": [
+        "./test/chai-expect-hook.js",
+        "./test/env-hook.js"
+    ]
+}

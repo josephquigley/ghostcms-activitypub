@@ -10,10 +10,11 @@
   "scripts": {
     "start": "NODE_ENV=production node ./bin/www.js",
     "manual_post": "./bin/manual_post.js",
-    "lint": "npx eslint --fix app.js bin/ src/ migrations/ tests/",
+    "lint": "npx eslint --fix app.js bin/ src/ migrations/ test/",
     "dev": "npm run lint && NODE_ENV=development DEBUG=ghostcms-activitypub:* node ./bin/www.js",
     "newRelease": "node ./bin/new_release.js",
-    "test": "npm run lint && c8 mocha --recursive ./tests"
+    "test": "npm run lint && npm run coverage",
+    "coverage": "npx c8 mocha"
   },
   "dependencies": {
     "@tryghost/content-api": "^1.11.7",
@@ -37,7 +38,6 @@
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-n": "^15.6.1",
     "eslint-plugin-promise": "^6.1.1",
-    "mocha": "^10.2.0",
-    "sinon": "^15.0.3"
+    "mocha": "^10.2.0"
   }
 }
