@@ -95,7 +95,7 @@ export const profileRoute = async function (req, res, next) {
   }
 
   if (siteData == null) {
-    siteData = await Ghost.settings.browse()
+    siteData = await Ghost().settings.browse()
   }
 
   const profile = profilePayload()
@@ -106,7 +106,7 @@ export const profileRoute = async function (req, res, next) {
   if (!req.app.get('account_created_at')) {
     // Fetch the oldest post to determine the ActivityPub actor creation/published date
     try {
-      const oldestPosts = await Ghost.posts.browse({ limit: 1, order: 'published_at asc' })
+      const oldestPosts = await Ghost().posts.browse({ limit: 1, order: 'published_at asc' })
       if (oldestPosts.length > 0) {
         req.app.set('account_created_at', oldestPosts[0].published_at)
       } else {

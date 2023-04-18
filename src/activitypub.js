@@ -99,6 +99,10 @@ export class ActivityPub {
 
     return payload
   }
+
+  setOnQueueEmpty (fn) {
+    this.#queue.onEmpty = fn
+  }
 }
 
 export const MainQueue = new ActivityPub()

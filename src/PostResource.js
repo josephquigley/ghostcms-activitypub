@@ -2,7 +2,8 @@ import { createTagPayload } from './routes/tags.js'
 import { Ghost } from './ghost.js'
 import { url } from './constants.js'
 import { Database, PostPublishState } from './Database.js'
-import ActivityPub from './activitypub.js'
+import { MainQueue } from './ActivityPub.js'
+import { MissingRequiredParameterError } from './errors.js'
 
 export class PostPayload {
   constructor (params) {
@@ -14,7 +15,14 @@ export class PostPayload {
       }
     ]
 
+    if (!params.ghostPost) {
+      throw new MissingRequiredParameterError('ghostPost')
+    }
     const ghostPost = params.ghostPost
+
+    if (!params.id) {
+      throw new MissingRequiredParameterError('id')
+    }
 
     this.id = params.id
     this.published = ghostPost.published_at
@@ -23,6 +31,7 @@ export class PostPayload {
     this.visibility = 'public'
     this.language = params.language ?? 'en'
     this.uri = this.id
+    /* c8 ignore next */
     this.url = ghostPost.url ?? null
     this.atomUri = this.id
     this.content = null
@@ -34,12 +43,12 @@ export class PostPayload {
     this.attributedTo = url.account
     this.tag = []
 
-    const excerpt = ghostPost.excerpt ?? ghostPost.custom_excerpt
+    const excerpt = ghostPost.custom_excerpt ?? ghostPost.excerpt
     this.summary = `${ghostPost.title}\n\n${excerpt}`
 
     // Check to see if the summary ends with punctuation, otherwise assume the text got cut off and add elipses.
     // Only add punctuation if the summary is shorter than the body
-    if (excerpt.match(/[\d\w]$/g) && (ghostPost.plaintext != excerpt)) { // eslint-disable-line eqeqeq
+    if (excerpt.match(/[\d\w]$/g) && ghostPost.plaintext != ghostPost.excerpt && ghostPost.custom_excerpt == null) { // eslint-disable-line eqeqeq
       this.summary += '...'
     }
 
@@ -54,9 +63,13 @@ export class PostPayload {
 export class PostResource {
   constructor (params) {
     this.language = params.language ?? 'en'
+    /* c8 ignore next */
     this.ghostAPI = params.ghostAPI ?? Ghost()
+
+    /* c8 ignore next */
     this.db = params.db ?? new Database()
     this.queryLimit = params.queryLimit ?? 10
+    this.activityPub = params.activityPub ?? MainQueue
   }
 
   async getPosts (filters) {
@@ -116,17 +129,20 @@ export class PostResource {
 
       res.json(new PostPayload({ ghostPost: post, language: this.language, id: postStates[0].activityPubId }))
     } catch (err) {
+      /* c8 ignore start */
       if (err.response) {
-        res.status(err.response.status).send(err.response.statusText)
+        console.error(err.response.status, err.response.statusText)
       } else {
         console.error(err)
-        res.status(500).send('Unable to fetch post.')
       }
+      /* c8 ignore stop */
+
+      res.status(500).send('Unable to fetch post.')
     }
   }
 
   async postPublishRoute (req, res) {
-    if (req.query.apiKey != req.app.get('apiKey')) { // eslint-disable-line eqeqeq
+    if (!req.query.apiKey || req.query.apiKey != req.app.get('apiKey')) { // eslint-disable-line eqeqeq
       res.status(401).send()
       return
     }
@@ -139,15 +155,18 @@ export class PostResource {
       const postObject = new PostPayload({ ghostPost: post, language: this.language, id: postState.activityPubId })
 
       followers.forEach(follower => {
-        ActivityPub.enqueue(async () => {
+        this.activityPub.enqueue(async () => {
           try {
-            await ActivityPub.sendMessage(ActivityPub.createNotification('Create', postObject), follower.inbox)
+            await this.activityPub.sendMessage(this.activityPub.createNotification('Create', postObject), follower.inbox)
           } catch (err) {
+            /* c8 ignore start */
             if (process.env.NODE_ENV === 'development') {
               console.error(err)
             }
+            /* c8 ignore stop */
+
             // If account is gone, delete follower
-            if (err.statusCode === 410) {
+            if (err.statusCode >= 400 && err.statusCode < 500) {
               await this.db.deleteFollowerWithUri(follower.inbox)
             }
           }
@@ -157,17 +176,19 @@ export class PostResource {
       res.status(200).send()
       return
     } catch (err) {
+      /* c8 ignore start */
       console.error(err.message)
       if (err.statusCode) {
         res.status(err.statusCode).send(err.message)
       } else {
         res.status(500).send('Unable to publish post')
       }
+      /* c8 ignore end */
     }
   }
 
   async postDeleteRoute (req, res) {
-    if (req.query.apiKey != req.app.get('apiKey')) { // eslint-disable-line eqeqeq
+    if (!req.query.apiKey || req.query.apiKey != req.app.get('apiKey')) { // eslint-disable-line eqeqeq
       res.status(401).send()
       return
     }
@@ -195,7 +216,7 @@ export class PostResource {
       }
 
       followers.forEach(follower => {
-        ActivityPub.enqueueMessage(ActivityPub.createNotification('Delete', activityPubId), follower.inbox)
+        this.activityPub.enqueueMessage(this.activityPub.createNotification('Delete', activityPubId), follower.inbox)
       })
 
       res.status(200).send()

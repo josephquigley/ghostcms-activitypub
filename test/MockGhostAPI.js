@@ -1,4 +1,3 @@
-
 export class MockGhostAPI {
   constructor (settingsData, postsData) {
     this.settings = {
@@ -55,45 +54,13 @@ export class MockGhostAPI {
       }
     }
     this.posts = {
-      browse: () => {
+      browse: (filters) => {
+        this.filters = filters
         if (postsData) {
           return postsData()
         } else {
           const payload = [
-            {
-              slug: 'welcome-short',
-              id: '5ddc9141c35e7700383b2937',
-              uuid: 'a5aa9bd8-ea31-415c-b452-3040dae1e730',
-              title: 'Welcome',
-              html: "<p>👋 Welcome, it's great to have you here.</p>",
-              comment_id: '5ddc9141c35e7700383b2937',
-              feature_image: 'https://static.ghost.org/v3.0.0/images/welcome-to-ghost.png',
-              feature_image_alt: null,
-              feature_image_caption: null,
-              featured: false,
-              visibility: 'public',
-              created_at: '2019-11-26T02:43:13.000+00:00',
-              updated_at: '2019-11-26T02:44:17.000+00:00',
-              published_at: '2019-11-26T02:44:17.000+00:00',
-              custom_excerpt: null,
-              codeinjection_head: null,
-              codeinjection_foot: null,
-              custom_template: null,
-              canonical_url: null,
-              url: 'https://docs.ghost.io/welcome-short/',
-              excerpt: "👋 Welcome, it's great to have you here.",
-              reading_time: 0,
-              access: true,
-              og_image: null,
-              og_title: null,
-              og_description: null,
-              twitter_image: null,
-              twitter_title: null,
-              twitter_description: null,
-              meta_title: null,
-              meta_description: null,
-              email_subject: null
-            }
+            this.ghostPost()
           ]
 
           payload.meta = {
@@ -109,7 +76,52 @@ export class MockGhostAPI {
 
           return payload
         }
+      },
+
+      read: (filters, format) => {
+        this.filters = filters
+        this.format = format
+        this.postId = filters.id
+
+        return this.ghostPost()
       }
+    }
+  }
+
+  ghostPost () {
+    return {
+      slug: 'welcome-short',
+      id: '5ddc9141c35e7700383b2937',
+      uuid: 'a5aa9bd8-ea31-415c-b452-3040dae1e730',
+      title: 'Welcome',
+      html: "<p>👋 Welcome, it's great to have you here.</p>",
+      comment_id: '5ddc9141c35e7700383b2937',
+      feature_image: 'https://static.ghost.org/v3.0.0/images/welcome-to-ghost.png',
+      feature_image_alt: null,
+      feature_image_caption: null,
+      featured: false,
+      visibility: 'public',
+      created_at: '2019-11-26T02:43:13.000+00:00',
+      updated_at: '2019-11-26T02:44:17.000+00:00',
+      published_at: '2019-11-26T02:44:17.000+00:00',
+      custom_excerpt: null,
+      codeinjection_head: null,
+      codeinjection_foot: null,
+      custom_template: null,
+      canonical_url: null,
+      url: 'https://docs.ghost.io/welcome-short/',
+      excerpt: "👋 Welcome, it's great to have you here.",
+      reading_time: 0,
+      access: true,
+      og_image: null,
+      og_title: null,
+      og_description: null,
+      twitter_image: null,
+      twitter_title: null,
+      twitter_description: null,
+      meta_title: null,
+      meta_description: null,
+      email_subject: null
     }
   }
 }

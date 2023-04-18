@@ -47,7 +47,7 @@ export async function tagCollectionRoute (req, res) {
   const slug = req.path.replace(/\/*/, '')
 
   try {
-    const tagData = await Ghost.tags.read({ slug }, { include: 'count.posts', filter: 'visibility:public' })
+    const tagData = await Ghost().tags.read({ slug }, { include: 'count.posts', filter: 'visibility:public' })
 
     const shouldForwardHTMLToGhost = process.env.NODE_ENV === 'production' || req.query.forward
 
@@ -56,7 +56,7 @@ export async function tagCollectionRoute (req, res) {
       return
     }
 
-    const postsForTag = await Ghost.posts.browse({ limit: 10, filter: `tag:${slug}`, formats: ['html'] })
+    const postsForTag = await Ghost().posts.browse({ limit: 10, filter: `tag:${slug}`, formats: ['html'] })
 
     res.json(createTagCollectionPayload(tagData, postsForTag))
   } catch (err) {

@@ -5,6 +5,11 @@ import knex from 'knex'
 export class Follower {
   uri
   inbox
+
+  constructor (uri, inbox) {
+    this.uri = uri
+    this.inbox = inbox
+  }
 }
 
 export class PostPublishState {

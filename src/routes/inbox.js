@@ -1,6 +1,6 @@
 import { Database } from '../db.js'
 import { url } from '../constants.js'
-import ActivityPub from '../activitypub.js'
+import ActivityPub from '../ActivityPub.js'
 const db = new Database()
 
 function isFollowAccount (message) {

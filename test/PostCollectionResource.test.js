@@ -4,15 +4,12 @@ import MockExpressResponse from './MockExpressResponse.js'
 import { PostResource } from '../src/PostResource.js'
 import { MockGhostAPI } from './MockGhostAPI.js'
 import { MockDatabase } from './MockDatabase.js'
-// import { OrderedCollectionPage } from '../src/OrderedCollection.js'
-import { expect } from 'chai'
 
 function getRandomInt (max) {
   return Math.floor(Math.random() * max)
 }
 
 describe('PostCollectionResource', () => {
-  // TODO ghost api mock
   let postResource = null
   let collectionResource = null
   let response = null

@@ -105,7 +105,7 @@ async function createServer (lang) {
   server.on('listening', onListening)
 }
 
-Ghost.settings.browse().then(async settings => {
+Ghost().settings.browse().then(async settings => {
   await new Database().initialize()
   return settings.lang
 }).then(lang => {
